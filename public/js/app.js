@@ -125,3 +125,29 @@ window.onload = () => {
     loadEditorArticles();
   }
 };
+const form = document.getElementById("articleForm");
+
+if (form) {
+  form.onsubmit = function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("/article", {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.text())
+    .then(msg => {
+      alert(msg);
+
+      // refresh editor table
+      if (typeof loadEditorArticles === "function") {
+        loadEditorArticles();
+      }
+
+      form.reset();
+    })
+    .catch(err => console.error(err));
+  };
+}

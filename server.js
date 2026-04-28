@@ -83,19 +83,32 @@ else res.status(401).send("Invalid login")
 
 /* ---------------- CREATE ARTICLE ---------------- */
 
-app.post("/article", upload.single("image"), (req,res)=>{
+app.post("/article", upload.single("image"), (req, res) => {
 
-const {title,content,author,category} = req.body
-const image = req.file ? "/uploads/" + req.file.filename : ""
+  console.log("BODY:", req.body);
+  console.log("FILE:", req.file);
 
-db.run(
-"INSERT INTO articles(title,content,image,category,author,date) VALUES(?,?,?,?,?,datetime('now'))",
-[title,content,image,category,author]
-)
+  const title = req.body.title || "";
+  const content = req.body.content || "";
+  const author = req.body.author || "Admin";
+  const category = req.body.category || "General";
 
-res.send("Article published")
+  const image = req.file ? "/uploads/" + req.file.filename : "";
 
-})
+  db.run(
+    "INSERT INTO articles(title,content,image,category,author,date) VALUES(?,?,?,?,?,datetime('now'))",
+    [title, content, image, category, author],
+    function(err) {
+      if (err) {
+        console.error("DB ERROR:", err);
+        return res.status(500).send("Error saving article");
+      }
+
+      console.log("Inserted ID:", this.lastID);
+      res.send("Article published");
+    }
+  );
+});
 
 /* ---------------- GET ALL ARTICLES ---------------- */
 
