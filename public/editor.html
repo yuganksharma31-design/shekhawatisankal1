@@ -244,7 +244,47 @@ alert("Article published")
 
 }
 
-location.reload()
+document.getElementById("articleForm").addEventListener("submit", async e => {
+
+  e.preventDefault()
+
+  document.getElementById("hiddenContent").value = quill.root.innerHTML
+
+  const form = new FormData(e.target)
+  const editId = e.target.getAttribute("data-edit-id")
+
+  if(editId){
+
+    await fetch("/article/" + editId,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        title:form.get("title"),
+        content:form.get("content"),
+        category:form.get("category")
+      })
+    })
+
+    alert("Article updated")
+    e.target.removeAttribute("data-edit-id")
+
+  } else {
+
+    await fetch("/article",{
+      method:"POST",
+      body:form
+    })
+
+    alert("Article published")
+
+  }
+
+  // ✅ THIS IS THE FIX
+  loadArticles()        // refresh table
+  e.target.reset()      // clear form
+  quill.root.innerHTML = "" // clear editor
+
+})
 
 })
 
