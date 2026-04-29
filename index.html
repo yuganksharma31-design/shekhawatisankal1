@@ -109,6 +109,59 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
 )
 
+/* LOAD HOME */
+async function loadHome(){
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .order("id", { ascending: false })
+    .limit(6)
+
+  if(error){
+    console.error(error)
+    return
+  }
+
+  const container = document.getElementById("news")
+  if(!container) return
+
+  container.innerHTML = ""
+
+  data.forEach(a => {
+    container.innerHTML += `
+      <div class="col-md-4">
+        <div class="news-card">
+          <img src="${a.image || 'https://picsum.photos/400'}">
+          <h5>${a.title}</h5>
+          <p>${a.content.substring(0,100)}...</p>
+          <a href="article.html?id=${a.id}" class="btn btn-dark btn-sm m-3">
+            Read More
+          </a>
+        </div>
+      </div>
+    `
+  })
+}
+
+/* BREAKING NEWS */
+async function loadBreaking(){
+
+  const { data } = await supabase
+    .from("articles")
+    .select("*")
+
+  if(!data) return
+
+  const text = data.slice(0,5).map(a => a.title).join(" • ")
+  document.getElementById("breakingNews").innerText = text
+}
+
+/* INIT */
+loadHome()
+loadBreaking()
+
+</script>
 /* LOAD DATA ONCE */
 async function getArticles(){
   const { data, error } = await supabase
