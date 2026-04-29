@@ -9,10 +9,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-body{
-background:#f5f5f5;
-font-family:Georgia, serif;
-}
+body{background:#f5f5f5;font-family:Georgia, serif;}
 .navbar{background:#111;}
 .navbar-brand{font-weight:bold;font-size:26px;}
 .breaking{background:#d90429;color:white;padding:10px;font-weight:bold;}
@@ -33,11 +30,7 @@ footer{background:#111;color:white;padding:20px;margin-top:40px;text-align:cente
 <div class="container">
 <a class="navbar-brand" href="/">Shekhawati Sankalp</a>
 
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
-<span class="navbar-toggler-icon"></span>
-</button>
-
-<div class="collapse navbar-collapse" id="menu">
+<div class="collapse navbar-collapse">
 <ul class="navbar-nav ms-auto">
 <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
 <li class="nav-item"><a class="nav-link" href="/local.html">Local News</a></li>
@@ -63,7 +56,7 @@ footer{background:#111;color:white;padding:20px;margin-top:40px;text-align:cente
 <div id="heroSection"></div>
 </div>
 
-<!-- FEATURED + SIDEBAR -->
+<!-- FEATURED -->
 <div class="container mt-4">
 <div class="row">
 
@@ -73,26 +66,20 @@ footer{background:#111;color:white;padding:20px;margin-top:40px;text-align:cente
 
 <div class="col-md-4">
 <div class="sidebar">
-<h4 class="mb-3">Latest News</h4>
+<h4>Latest News</h4>
 <div id="trendingContainer"></div>
-
-<div class="mt-3">
-<a href="allnews.html" class="btn btn-outline-dark btn-sm">
-View All News →
-</a>
-</div>
+<a href="allnews.html" class="btn btn-outline-dark btn-sm mt-3">View All News →</a>
 </div>
 </div>
 
 </div>
 </div>
 
-<!-- NEWS GRID -->
+<!-- GRID -->
 <div class="container mt-4">
 <div class="row g-4" id="newsContainer"></div>
 </div>
 
-<!-- FOOTER -->
 <footer>
 <p>© 2026 Shekhawati Sankalp</p>
 <p>About | Contact | Advertise</p>
@@ -109,71 +96,14 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
 )
 
-/* LOAD HOME */
-async function loadHome(){
-
-  const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .order("id", { ascending: false })
-    .limit(6)
-
-  if(error){
-    console.error(error)
-    return
-  }
-
-  const container = document.getElementById("news")
-  if(!container) return
-
-  container.innerHTML = ""
-
-  data.forEach(a => {
-    container.innerHTML += `
-      <div class="col-md-4">
-        <div class="news-card">
-          <img src="${a.image || 'https://picsum.photos/400'}">
-          <h5>${a.title}</h5>
-          <p>${a.content.substring(0,100)}...</p>
-          <a href="article.html?id=${a.id}" class="btn btn-dark btn-sm m-3">
-            Read More
-          </a>
-        </div>
-      </div>
-    `
-  })
-}
-
-/* BREAKING NEWS */
-async function loadBreaking(){
-
-  const { data } = await supabase
-    .from("articles")
-    .select("*")
-
-  if(!data) return
-
-  const text = data.slice(0,5).map(a => a.title).join(" • ")
-  document.getElementById("breakingNews").innerText = text
-}
-
-/* INIT */
-loadHome()
-loadBreaking()
-
-</script>
-/* LOAD DATA ONCE */
+/* GET ARTICLES */
 async function getArticles(){
   const { data, error } = await supabase
     .from("articles")
     .select("*")
-    .order("id", { ascending: false })
+    .order("id", { ascending:false })
 
-  if(error){
-    console.error(error)
-    return []
-  }
-
+  if(error){ console.error(error); return [] }
   return data
 }
 
@@ -185,28 +115,27 @@ async function loadHero(){
   const a = articles[0]
 
   document.getElementById("heroSection").innerHTML = `
-  <div class="hero-card">
-    <img src="${a.image || 'https://picsum.photos/800/400'}">
-    <h2 class="mt-3">${a.title}</h2>
-    <p>${a.content.substring(0,150)}...</p>
-    <a href="article.html?id=${a.id}" class="btn btn-dark">Read Full Story</a>
-  </div>`
+    <div class="hero-card">
+      <img src="${a.image || 'https://picsum.photos/800/400'}">
+      <h2 class="mt-3">${a.title}</h2>
+      <p>${a.content.substring(0,150)}...</p>
+      <a href="article.html?id=${a.id}" class="btn btn-dark">Read</a>
+    </div>`
 }
 
 /* FEATURED */
-async function loadFeaturedNews(){
+async function loadFeatured(){
   const articles = await getArticles()
-  const container = document.getElementById("featuredNews")
-  container.innerHTML=""
+  const c = document.getElementById("featuredNews")
+  c.innerHTML=""
 
   articles.slice(1,3).forEach(a=>{
-    container.innerHTML+=`
+    c.innerHTML+=`
     <div class="col-md-6">
       <div class="featured-card">
         <img src="${a.image || 'https://picsum.photos/400'}">
         <h4>${a.title}</h4>
         <p>${a.content.substring(0,120)}...</p>
-        <a href="article.html?id=${a.id}" class="btn btn-dark btn-sm">Read</a>
       </div>
     </div>`
   })
@@ -215,18 +144,17 @@ async function loadFeaturedNews(){
 /* GRID */
 async function loadNews(){
   const articles = await getArticles()
-  const container = document.getElementById("newsContainer")
-  container.innerHTML=""
+  const c = document.getElementById("newsContainer")
+  c.innerHTML=""
 
   articles.slice(3,8).forEach(a=>{
-    container.innerHTML+=`
-    <div class="col-md-6">
+    c.innerHTML+=`
+    <div class="col-md-4">
       <div class="news-card">
         <img src="${a.image || 'https://picsum.photos/400'}">
         <div class="p-3">
           <h5>${a.title}</h5>
           <p>${a.content.substring(0,100)}...</p>
-          <a href="article.html?id=${a.id}" class="btn btn-dark btn-sm">Read</a>
         </div>
       </div>
     </div>`
@@ -236,44 +164,39 @@ async function loadNews(){
 /* SIDEBAR */
 async function loadTrending(){
   const articles = await getArticles()
-  const container = document.getElementById("trendingContainer")
-  container.innerHTML=""
+  const c = document.getElementById("trendingContainer")
+  c.innerHTML=""
 
   articles.slice(0,3).forEach(a=>{
-    container.innerHTML+=`
-    <div class="mb-2">
-      <a href="article.html?id=${a.id}">${a.title}</a>
-    </div>`
+    c.innerHTML+=`<div><a href="article.html?id=${a.id}">${a.title}</a></div>`
   })
 }
 
 /* BREAKING */
 async function loadBreaking(){
   const articles = await getArticles()
-  const headlines = articles.slice(0,5).map(a=>a.title).join(" • ")
-  document.getElementById("breakingNews").innerText=headlines
+  const text = articles.slice(0,5).map(a=>a.title).join(" • ")
+  document.getElementById("breakingNews").innerText=text
 }
 
 /* SEARCH */
-async function searchNews(){
-  const q=document.getElementById("searchInput").value
+window.searchNews = async function(){
+  const q = document.getElementById("searchInput").value
 
   const { data } = await supabase
     .from("articles")
     .select("*")
     .ilike("title", `%${q}%`)
 
-  const container=document.getElementById("newsContainer")
-  container.innerHTML=""
+  const c = document.getElementById("newsContainer")
+  c.innerHTML=""
 
   data.forEach(a=>{
-    container.innerHTML+=`
+    c.innerHTML+=`
     <div class="col-md-4">
-      <div class="news-card">
-        <div class="p-3">
-          <h5>${a.title}</h5>
-          <p>${a.content.substring(0,100)}...</p>
-        </div>
+      <div class="news-card p-3">
+        <h5>${a.title}</h5>
+        <p>${a.content.substring(0,100)}...</p>
       </div>
     </div>`
   })
@@ -281,7 +204,7 @@ async function searchNews(){
 
 /* INIT */
 loadHero()
-loadFeaturedNews()
+loadFeatured()
 loadNews()
 loadTrending()
 loadBreaking()
