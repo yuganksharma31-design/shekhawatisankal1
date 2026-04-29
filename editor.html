@@ -12,24 +12,10 @@
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
 <style>
-body{
-background:#f5f5f5;
-font-family:Arial, Helvetica, sans-serif;
-}
-.navbar{
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
-}
-.dashboard{
-margin-top:30px;
-}
-.card{
-border-radius:10px;
-box-shadow:0 2px 10px rgba(0,0,0,0.08);
-}
-#editor{
-height:200px;
-background:white;
-}
+body{background:#f5f5f5;font-family:Arial;}
+.card{border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+#editor{height:200px;background:white;}
+#preview{width:100%;margin-bottom:10px;border-radius:8px;}
 </style>
 </head>
 
@@ -37,44 +23,39 @@ background:white;
 
 <nav class="navbar navbar-dark bg-dark">
 <div class="container">
-<span class="navbar-brand">Shekhawati Sankalp - Editor Panel</span>
+<span class="navbar-brand">Editor Panel</span>
 <a href="/" class="btn btn-outline-light btn-sm">View Website</a>
 </div>
 </nav>
 
-<div class="container dashboard">
+<div class="container mt-4">
 <div class="row">
 
 <!-- FORM -->
 <div class="col-md-6">
 <div class="card p-4">
 
-<h4 class="mb-3">Write New Article</h4>
+<h4>Write Article</h4>
 
 <form id="articleForm">
 
-<div class="mb-3">
-<input name="title" class="form-control" placeholder="Article Title" required>
-</div>
+<input name="title" class="form-control mb-3" placeholder="Title" required>
 
-<div class="mb-3">
-<label class="form-label">Article Content</label>
 <div id="editor"></div>
 <input type="hidden" name="content" id="hiddenContent">
-</div>
 
-<div class="mb-3">
-<select name="category" class="form-control">
+<select name="category" class="form-control mt-3">
 <option>Local</option>
 <option>Trending</option>
 </select>
-</div>
 
-<div class="mb-3">
-<input name="author" class="form-control" placeholder="Author Name">
-</div>
+<input name="author" class="form-control mt-3" placeholder="Author">
 
-<button class="btn btn-dark">Publish Article</button>
+<!-- IMAGE -->
+<img id="preview">
+<input type="file" id="imageInput" class="form-control mt-2">
+
+<button class="btn btn-dark mt-3">Publish</button>
 
 </form>
 
@@ -85,15 +66,14 @@ background:white;
 <div class="col-md-6">
 <div class="card p-4">
 
-<h5 class="mb-3">Article Manager</h5>
+<h5>Articles</h5>
 
-<table class="table table-striped">
+<table class="table">
 <thead>
 <tr>
 <th>Title</th>
 <th>Category</th>
-<th>Date</th>
-<th>Actions</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody id="articleTable"></tbody>
@@ -114,128 +94,118 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
 )
 
-/* ================= EDITOR ================= */
-var quill = new Quill('#editor', {
-  theme: 'snow',
-  placeholder: 'Write your article here...'
+var quill = new Quill('#editor',{theme:'snow'})
+
+let currentImage = ""
+
+/* IMAGE PREVIEW */
+document.getElementById("imageInput").addEventListener("change", e=>{
+  const file = e.target.files[0]
+  if(file){
+    document.getElementById("preview").src = URL.createObjectURL(file)
+  }
 })
 
-/* ================= LOAD ================= */
-async function loadArticles() {
+/* LOAD */
+async function loadArticles(){
 
-  const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .order("id", { ascending: false })
-
-  if (error) {
-    console.error(error)
-    return
-  }
+  const { data } = await supabase.from("articles").select("*")
 
   const table = document.getElementById("articleTable")
-  table.innerHTML = ""
+  table.innerHTML=""
 
-  data.forEach(a => {
-    table.innerHTML += `
-      <tr>
-        <td>${a.title}</td>
-        <td>${a.category}</td>
-        <td>${a.date || "-"}</td>
-        <td>
-          <button onclick="editArticle(${a.id})" class="btn btn-sm btn-warning">Edit</button>
-          <button onclick="deleteArticle(${a.id})" class="btn btn-sm btn-danger">Delete</button>
-        </td>
-      </tr>
-    `
+  data.forEach(a=>{
+    table.innerHTML+=`
+    <tr>
+      <td>${a.title}</td>
+      <td>${a.category}</td>
+      <td>
+        <button onclick="editArticle(${a.id})" class="btn btn-warning btn-sm">Edit</button>
+        <button onclick="deleteArticle(${a.id})" class="btn btn-danger btn-sm">Delete</button>
+      </td>
+    </tr>`
   })
 }
 
-/* ================= DELETE ================= */
-window.deleteArticle = async function(id) {
-
-  if (!confirm("Delete this article?")) return
-
-  const { error } = await supabase
-    .from("articles")
-    .delete()
-    .eq("id", id)
-
-  if (error) {
-    alert("Delete failed")
-  } else {
-    alert("Deleted ✅")
-    loadArticles()
-  }
+/* DELETE */
+window.deleteArticle = async function(id){
+  await supabase.from("articles").delete().eq("id",id)
+  loadArticles()
 }
 
-/* ================= EDIT ================= */
-window.editArticle = async function(id) {
+/* EDIT */
+window.editArticle = async function(id){
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("articles")
     .select("*")
-    .eq("id", id)
+    .eq("id",id)
     .single()
-
-  if (error) return
 
   document.querySelector("input[name='title']").value = data.title
   quill.root.innerHTML = data.content
   document.querySelector("select[name='category']").value = data.category
 
-  document.getElementById("articleForm").setAttribute("data-edit-id", id)
+  currentImage = data.image || ""
+  document.getElementById("preview").src = currentImage
+
+  document.getElementById("articleForm").setAttribute("data-id",id)
 }
 
-/* ================= SUBMIT ================= */
-document.getElementById("articleForm").addEventListener("submit", async e => {
+/* SUBMIT */
+document.getElementById("articleForm").addEventListener("submit", async e=>{
 
   e.preventDefault()
 
-  document.getElementById("hiddenContent").value = quill.root.innerHTML
+  const title = document.querySelector("input[name='title']").value
+  const content = quill.root.innerHTML
+  const category = document.querySelector("select[name='category']").value
+  const author = document.querySelector("input[name='author']").value
 
-  const form = new FormData(e.target)
+  const file = document.getElementById("imageInput").files[0]
 
-  const title = form.get("title")
-  const content = form.get("content")
-  const category = form.get("category")
-  const author = form.get("author")
+  let imageUrl = currentImage
 
-  const editId = e.target.getAttribute("data-edit-id")
+  // 🔥 Upload image to Cloudinary
+  if(file){
+    const formData = new FormData()
+    formData.append("file",file)
+    formData.append("upload_preset","unsigned_upload")
 
-  let response
+    const res = await fetch("https://api.cloudinary.com/v1_1/dxtqp7bj0/image/upload",{
+      method:"POST",
+      body:formData
+    })
 
-  if (editId) {
-    // UPDATE
-    response = await supabase
+    const data = await res.json()
+    imageUrl = data.secure_url
+  }
+
+  const editId = e.target.getAttribute("data-id")
+
+  if(editId){
+    await supabase
       .from("articles")
-      .update({ title, content, category, author })
-      .eq("id", editId)
+      .update({title,content,category,author,image:imageUrl})
+      .eq("id",editId)
 
     alert("Updated ✅")
-    e.target.removeAttribute("data-edit-id")
-
-  } else {
-    // INSERT
-    response = await supabase
+  }else{
+    await supabase
       .from("articles")
-      .insert([{ title, content, category, author, image:"", date:new Date() }])
+      .insert([{title,content,category,author,image:imageUrl,date:new Date()}])
 
     alert("Published ✅")
   }
 
-  if (response.error) {
-    console.error(response.error)
-    alert("Error: " + response.error.message)
-  }
-
   e.target.reset()
-  quill.root.innerHTML = ""
+  quill.root.innerHTML=""
+  document.getElementById("preview").src=""
+  currentImage=""
 
   loadArticles()
 })
 
-/* ================= INIT ================= */
 loadArticles()
 
 </script>
