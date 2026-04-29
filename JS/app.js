@@ -77,30 +77,36 @@ function loadSingleArticle() {
    EDITOR PANEL - LOAD ARTICLES
 =========================== */
 
-function loadEditorArticles() {
-  fetch("/articles")
-    .then(res => res.json())
-    .then(data => {
-      const table = document.getElementById("articlesTable");
-      if (!table) return;
+async function loadEditorArticles() {
 
-      table.innerHTML = "";
+  const table = document.getElementById("articlesTable");
+  if (!table) return;
 
-      data.forEach(a => {
-        table.innerHTML += `
-          <tr>
-            <td>${a.title}</td>
-            <td>${a.category}</td>
-            <td>${a.date}</td>
-            <td>
-              <button onclick="deleteArticle(${a.id})">Delete</button>
-            </td>
-          </tr>
-        `;
-      });
-    });
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Error:", error);
+    return;
+  }
+
+  table.innerHTML = "";
+
+  data.forEach(a => {
+    table.innerHTML += `
+      <tr>
+        <td>${a.title}</td>
+        <td>${a.category}</td>
+        <td>${a.date || "-"}</td>
+        <td>
+          <button onclick="deleteArticle(${a.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
 }
-
 /* ===========================
    DELETE ARTICLE
 =========================== */
@@ -108,13 +114,21 @@ function loadEditorArticles() {
 function deleteArticle(id) {
   if (!confirm("Delete this article?")) return;
 
-  fetch("/article/" + id, {
-    method: "DELETE"
-  })
-    .then(() => {
-      alert("Deleted");
-      loadEditorArticles();
-    });
+async function deleteArticle(id) {
+
+  const { error } = await supabase
+    .from("articles")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Delete error:", error);
+    alert("Delete failed");
+  } else {
+    alert("Deleted ✅");
+    loadEditorArticles();
+  }
+}
 }
 
 /* ===========================
