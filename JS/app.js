@@ -1,12 +1,24 @@
 /* ===========================
    LOAD HOME PAGE ARTICLES
 =========================== */
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-function loadHome() {
-  fetch("/articles")
-    .then(res => res.json())
-    .then(data => renderHome(data))
-    .catch(err => console.error("Error:", err));
+const supabase = createClient(
+  "https://snicsrpjkecogyepkhrk.supabase.co/",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
+)
+async function loadHome() {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Error:", error);
+    return;
+  }
+
+  renderHome(data);
 }
 
 function renderHome(data) {
