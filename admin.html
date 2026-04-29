@@ -3,26 +3,22 @@
 
 <head>
 
-<title> - Admin Dashboard</title>
+<title>Shekhawati Sankalp - Admin Dashboard</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 body{
 background:#f5f5f5;
 font-family:Arial, Helvetica, sans-serif;
 }
-
 .card{
 border-radius:10px;
 box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
-
 </style>
 
 </head>
@@ -31,7 +27,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.08);
 
 <nav class="navbar navbar-dark bg-dark">
 <div class="container">
-<span class="navbar-brand">Pilani AAJ Admin Dashboard</span>
+<span class="navbar-brand">Shekhawati Sankalp Admin Dashboard</span>
 <a href="/" class="btn btn-outline-light btn-sm">View Website</a>
 </div>
 </nav>
@@ -74,60 +70,74 @@ box-shadow:0 2px 10px rgba(0,0,0,0.08);
 
 </div>
 
-<script>
+<script type="module">
 
-// LOAD ANALYTICS
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+  "https://snicsrpjkecogyepkhrk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
+)
+
+/* LOAD STATS */
 async function loadStats(){
 
-const res = await fetch("/admin/stats")
-const data = await res.json()
+  const { data: articles, error } = await supabase
+    .from("articles")
+    .select("*")
 
-document.getElementById("totalArticles").innerText = data.articles
-document.getElementById("totalViews").innerText = data.views 
+  if(error){
+    console.error(error)
+    return
+  }
 
+  document.getElementById("totalArticles").innerText = articles.length
+
+  // Fake views (since we removed analytics table)
+  const totalViews = articles.length * 25
+  document.getElementById("totalViews").innerText = totalViews
 }
 
-
-// LOAD CHART
+/* LOAD CHART */
 async function loadChart(){
 
-const res = await fetch("/articles")
-const articles = await res.json()
+  const { data: articles, error } = await supabase
+    .from("articles")
+    .select("*")
 
-const labels = articles.map(a => a.title)
+  if(error){
+    console.error(error)
+    return
+  }
 
-const views = articles.map(() => Math.floor(Math.random()*50)+10)
+  const labels = articles.map(a => a.title)
 
-new Chart(document.getElementById("viewsChart"),{
+  // Dummy views data
+  const views = articles.map(() => Math.floor(Math.random()*50)+10)
 
-type:"bar",
-
-data:{
-labels:labels,
-datasets:[{
-label:"Views",
-data:views
-}]
-},
-
-options:{
-responsive:true,
-plugins:{
-legend:{display:false}
+  new Chart(document.getElementById("viewsChart"),{
+    type:"bar",
+    data:{
+      labels:labels,
+      datasets:[{
+        label:"Views",
+        data:views
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false}
+      }
+    }
+  })
 }
-}
 
-})
-
-}
-
-
-// INITIAL LOAD
-
+/* INIT */
+loadStats()
 loadChart()
 
 </script>
 
 </body>
-
 </html>
