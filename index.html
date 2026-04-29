@@ -82,7 +82,7 @@ background:#111;color:white;padding:20px;margin-top:40px;text-align:center;
 <div class="row">
 
 <div class="col-md-8">
-<div class="row g-3" id="featuredNews"></div>
+
 </div>
 
 <div class="col-md-4">
@@ -148,45 +148,36 @@ async function loadHero(){
 }
 
 /* FEATURED */
-async function loadFeatured(){
-  const articles = await getArticles()
-  const c = document.getElementById("featuredNews")
-  c.innerHTML=""
 
-  articles.slice(0,2).forEach(a=>{
-    c.innerHTML+=`
-    <div class="col-md-6">
-      <div class="featured-card">
-        <img src="${a.image || 'https://picsum.photos/400'}">
-        <h4>${a.title}</h4>
-        <p>${a.content.substring(0,120)}...</p>
-      </div>
-    </div>`
-  })
-}
 
 /* GRID */
 async function loadNews(){
   const articles = await getArticles()
+
   const c = document.getElementById("newsContainer")
-  c.innerHTML=""
+  c.innerHTML = ""
 
   if(!articles.length){
     c.innerHTML = "<p>No news available</p>"
     return
   }
 
-  articles.forEach(a=>{
-    c.innerHTML+=`
-    <div class="col-md-4">
-      <div class="news-card">
-        <img src="${a.image || 'https://picsum.photos/400'}">
-        <div class="p-3">
-          <h5>${a.title}</h5>
-          <p>${a.content.substring(0,100)}...</p>
+  // 👉 ONLY TOP 3 LATEST
+  articles.slice(0,3).forEach(a=>{
+    c.innerHTML += `
+      <div class="col-md-4">
+        <div class="news-card">
+          <img src="${a.image || 'https://picsum.photos/400'}">
+          <div class="p-3">
+            <h5>${a.title}</h5>
+            <p>${a.content.substring(0,100)}...</p>
+            <a href="article.html?id=${a.id}" class="btn btn-dark btn-sm mt-2">
+              Read More
+            </a>
+          </div>
         </div>
       </div>
-    </div>`
+    `
   })
 }
 
@@ -233,7 +224,7 @@ window.searchNews = async function(){
 
 /* INIT */
 loadHero()
-loadFeatured()
+
 loadNews()
 loadTrending()
 loadBreaking()
