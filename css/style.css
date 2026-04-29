@@ -307,3 +307,20 @@ footer{
   height:400px;
   object-fit:cover;
 }
+.brand-text{
+  font-family:'Noto Sans Devanagari', sans-serif;
+  font-size:26px;
+  font-weight:700;
+  color:#ffffff;
+}
+.navbar-brand img{
+  border-radius:6px;
+}
+.brand-text{
+  font-family:'Noto Sans Devanagari', sans-serif;
+  font-size:28px;
+  font-weight:700;
+  background: linear-gradient(90deg,#ffcc00,#ff0000);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
