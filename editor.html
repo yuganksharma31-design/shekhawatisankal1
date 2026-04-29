@@ -174,46 +174,36 @@ document.getElementById("articleForm").addEventListener("submit", async e => {
   document.getElementById("hiddenContent").value = quill.root.innerHTML
 
   const form = new FormData(e.target)
-  const editId = e.target.getAttribute("data-edit-id")
 
   const title = form.get("title")
   const content = form.get("content")
   const category = form.get("category")
   const author = form.get("author")
 
-  if (editId) {
+  console.log("Sending data:", title, content) // DEBUG
 
-    await supabase
-      .from("articles")
-      .update({ title, content, category })
-      .eq("id", editId)
+  const { data, error } = await supabase
+    .from("articles")
+    .insert([
+      {
+        title,
+        content,
+        category,
+        author,
+        image: "",
+        date: new Date()
+      }
+    ])
 
-    alert("Article updated")
-    e.target.removeAttribute("data-edit-id")
-
+  if (error) {
+    console.error("Insert error:", error)
+    alert("Error: " + error.message)
   } else {
-
-    await supabase
-      .from("articles")
-      .insert([
-        {
-          title,
-          content,
-          category,
-          author,
-          image: "",
-          date: new Date()
-        }
-      ])
-
-    alert("Article published")
+    alert("Article published ✅")
+    loadArticles()
   }
 
-  loadArticles()
-  e.target.reset()
-  quill.root.innerHTML = ""
 })
-
 /* ================= INIT ================= */
 loadArticles()
 
