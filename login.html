@@ -3,7 +3,7 @@
 
 <head>
 
-<title>Shekhawati Sankalp - Editor Login</title>
+<title>Shekhawati Sankalp - Login</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -73,21 +73,17 @@ Shekhawati Sankalp
 </div>
 
 <div class="login-sub">
-Editor Dashboard Login
+Editor Login
 </div>
 
 <form id="loginForm">
 
 <div class="mb-3">
-
-<input type="text" name="username" class="form-control" placeholder="Username" required>
-
+<input type="email" id="email" class="form-control" placeholder="Email" required>
 </div>
 
 <div class="mb-3">
-
-<input type="password" name="password" class="form-control" placeholder="Password" required>
-
+<input type="password" id="password" class="form-control" placeholder="Password" required>
 </div>
 
 <button class="btn btn-dark btn-login">
@@ -97,43 +93,39 @@ Login
 </form>
 
 <div class="footer-text">
-Secure Editor Access
+Secure Access
 </div>
 
 </div>
 
-<script>
+<script type="module">
 
-document.getElementById("loginForm").addEventListener("submit",async e=>{
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-e.preventDefault()
+const supabase = createClient(
+  "https://snicsrpjkecogyepkhrk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
+)
 
-const form=new FormData(e.target)
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
-const res=await fetch("/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-username:form.get("username"),
-password:form.get("password")
-})
-})
+  e.preventDefault()
 
-if(res.ok){
+  const email = document.getElementById("email").value
+  const password = document.getElementById("password").value
 
-const user=await res.json()
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
 
-if(user.role==="admin"){
-location.href="admin.html"
-}else{
-location.href="editor.html"
-}
-
-}else{
-
-alert("Invalid login credentials")
-
-}
+  if(error){
+    alert("Invalid login")
+    console.error(error)
+  } else {
+    alert("Login successful ✅")
+    window.location.href = "editor.html"
+  }
 
 })
 
