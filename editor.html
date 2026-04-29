@@ -143,7 +143,7 @@ async function loadArticles() {
         <td>${a.category}</td>
         <td>${a.date || "-"}</td>
         <td>
-          <button onclick="editArticle(${a.id}, \`${a.title}\`, \`${a.content}\`, \`${a.category}\`)" class="btn btn-sm btn-warning">Edit</button>
+          <button onclick="editArticle(${a.id})" class="btn btn-sm btn-warning">Edit</button>
           <button onclick="deleteArticle(${a.id})" class="btn btn-sm btn-danger">Delete</button>
         </td>
       </tr>
@@ -153,16 +153,37 @@ async function loadArticles() {
 
 /* ================= DELETE ================= */
 window.deleteArticle = async function(id) {
-  await supabase.from("articles").delete().eq("id", id)
-  alert("Deleted")
-  loadArticles()
+
+  if (!confirm("Delete this article?")) return
+
+  const { error } = await supabase
+    .from("articles")
+    .delete()
+    .eq("id", id)
+
+  if (error) {
+    alert("Delete failed")
+  } else {
+    alert("Deleted ✅")
+    loadArticles()
+  }
 }
 
 /* ================= EDIT ================= */
-window.editArticle = function(id, title, content, category) {
-  document.querySelector("input[name='title']").value = title
-  quill.root.innerHTML = content
-  document.querySelector("select[name='category']").value = category
+window.editArticle = async function(id) {
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .single()
+
+  if (error) return
+
+  document.querySelector("input[name='title']").value = data.title
+  quill.root.innerHTML = data.content
+  document.querySelector("select[name='category']").value = data.category
+
   document.getElementById("articleForm").setAttribute("data-edit-id", id)
 }
 
@@ -180,30 +201,40 @@ document.getElementById("articleForm").addEventListener("submit", async e => {
   const category = form.get("category")
   const author = form.get("author")
 
-  console.log("Sending data:", title, content) // DEBUG
+  const editId = e.target.getAttribute("data-edit-id")
 
-  const { data, error } = await supabase
-    .from("articles")
-    .insert([
-      {
-        title,
-        content,
-        category,
-        author,
-        image: "",
-        date: new Date()
-      }
-    ])
+  let response
 
-  if (error) {
-    console.error("Insert error:", error)
-    alert("Error: " + error.message)
+  if (editId) {
+    // UPDATE
+    response = await supabase
+      .from("articles")
+      .update({ title, content, category, author })
+      .eq("id", editId)
+
+    alert("Updated ✅")
+    e.target.removeAttribute("data-edit-id")
+
   } else {
-    alert("Article published ✅")
-    loadArticles()
+    // INSERT
+    response = await supabase
+      .from("articles")
+      .insert([{ title, content, category, author, image:"", date:new Date() }])
+
+    alert("Published ✅")
   }
 
+  if (response.error) {
+    console.error(response.error)
+    alert("Error: " + response.error.message)
+  }
+
+  e.target.reset()
+  quill.root.innerHTML = ""
+
+  loadArticles()
 })
+
 /* ================= INIT ================= */
 loadArticles()
 
