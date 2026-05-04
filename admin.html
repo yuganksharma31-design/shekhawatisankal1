@@ -35,6 +35,9 @@ body{
 <div class="container">
 <span class="navbar-brand">Shekhawati Sankalp Admin Dashboard</span>
 <a href="/" class="btn btn-outline-light btn-sm">View Website</a>
+<button onclick="logout()" class="btn btn-danger btn-sm ms-2">
+  Logout
+</button>
 </div>
 </nav>
 
@@ -84,7 +87,22 @@ body{
 
 <!-- ================= NORMAL SCRIPT (NO MODULE) ================= -->
 <script>
+const PASSWORD = "Utpal123"; // change this
 
+if (localStorage.getItem("adminAuth") !== "true") {
+  const input = prompt("Enter Admin Password:");
+  if (input === PASSWORD) {
+    localStorage.setItem("adminAuth", "true");
+  } else {
+    alert("Wrong password");
+    window.location.href = "/";
+  }
+}
+
+window.logout = function () {
+  localStorage.removeItem("adminAuth");
+  window.location.href = "/";
+};
 window.openEditor = function (title, url) {
   localStorage.setItem("news_title", title);
   localStorage.setItem("news_url", url);
