@@ -146,27 +146,31 @@ window.onload = function () {
   loadArticles();
 }
 
-/* ================= AI BUTTONS ================= */
-function openChatGPT() {
+/* ================= AI BUTTONS ================= */window.openChatGPT = function () {
   const url = document.getElementById("sourceInput").value;
   const custom = document.getElementById("aiPrompt").value || "";
 
-  if (!url) return alert("No source URL");
+  if (!url) {
+    alert("No source URL");
+    return;
+  }
 
   const prompt = `${custom}\n\nRewrite this news article in good Hindi:\n${url}`;
   window.open("https://chat.openai.com/?q=" + encodeURIComponent(prompt), "_blank");
-}
+};
 
-function openGemini() {
+window.openGemini = function () {
   const url = document.getElementById("sourceInput").value;
   const custom = document.getElementById("aiPrompt").value || "";
 
-  if (!url) return alert("No source URL");
+  if (!url) {
+    alert("No source URL");
+    return;
+  }
 
   const prompt = `${custom}\n\nRewrite this news article in good Hindi:\n${url}`;
   window.open("https://gemini.google.com/app?prompt=" + encodeURIComponent(prompt), "_blank");
-}
-
+};
 /* ================= IMAGE ================= */
 document.getElementById("imageInput").addEventListener("change", e=>{
   const file = e.target.files[0]
