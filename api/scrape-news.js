@@ -1,41 +1,58 @@
-import Parser from "rss-parser";
-
-const parser = new Parser();
+import * as cheerio from "cheerio";
 
 export default async function handler(req, res) {
   try {
+    const url = "https://rajasthan.ndtv.in/";
 
-    const feed = await parser.parseURL(
-      "https://feeds.feedburner.com/rajasthan.ndtv.in"
-    );
-
-    const keywords = [
-      "rajasthan","jaipur","bikaner","jhunjhunu","pilani","chirawa",
-      "jodhpur","udaipur","kota","ajmer","sikar","alwar",
-      "राजस्थान","जयपुर","बीकानेर","झुंझुनूं","पिलानी","चिड़ावा","जोधपुर"
-    ];
-
-    const filtered = feed.items.filter(item => {
-      const text = (item.title + " " + (item.contentSnippet || "")).toLowerCase();
-
-      const isRajasthan = keywords.some(k => text.includes(k.toLowerCase()));
-
-      // 🔥 Hindi check (very important)
-      const isHindi = /[\u0900-\u097F]/.test(item.title);
-
-      return isRajasthan && isHindi;
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
     });
 
-    const results = filtered.map(item => ({
-      title: item.title,
-      url: item.link,
-      source: "NDTV"
-    }));
+    const html = await response.text();
+    const $ = cheerio.load(html);
 
-    res.status(200).json(results.slice(0, 15));
+    const results = [];
+    const base = "https://rajasthan.ndtv.in";
+
+    // 🔥 More flexible selector
+    $("a").each((i, el) => {
+      const title = $(el).text().trim();
+      let link = $(el).attr("href");
+
+      // only news links
+      if (link && link.includes("/news/")) {
+
+        const fullUrl = link.startsWith("http") ? link : base + link;
+
+        // avoid garbage links
+        if (title.length > 40) {
+          results.push({
+            title,
+            url: fullUrl,
+            source: "NDTV Rajasthan"
+          });
+        }
+      }
+    });
+
+    // 🔥 remove duplicates
+    const unique = [];
+    const seen = new Set();
+
+    for (let item of results) {
+      if (!seen.has(item.title)) {
+        seen.add(item.title);
+        unique.push(item);
+      }
+    }
+
+    res.status(200).json(unique.slice(0, 15));
 
   } catch (err) {
-    console.error(err);
+    console.error("SCRAPER ERROR:", err);
+
     res.status(200).json([]);
   }
 }
