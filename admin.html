@@ -104,17 +104,27 @@ function logout(){
 function cleanGoogleUrl(url) {
   try {
     const decoded = decodeURIComponent(url);
+
+    // 🔥 extract real article link
     const match = decoded.match(/https?:\/\/[^&]+/);
-    return match ? match[0] : url;
+
+    if (match && !match[0].includes("news.google.com")) {
+      return match[0];
+    }
+
+    return null; // ❌ ignore bad links
   } catch {
-    return url;
+    return null;
   }
 }
 
 window.openEditor = function (title, url) {
   const cleanUrl = cleanGoogleUrl(url);
 
-  console.log("FINAL URL:", cleanUrl); // DEBUG
+  if (!cleanUrl) {
+    alert("Invalid news link");
+    return;
+  }
 
   localStorage.setItem("news_title", title);
   localStorage.setItem("news_url", cleanUrl);

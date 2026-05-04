@@ -4,36 +4,59 @@ const parser = new Parser();
 
 export default async function handler(req, res) {
   try {
-    const feedUrl =
-      "https://news.google.com/rss/search?q=rajasthan&hl=hi&gl=IN&ceid=IN:hi";
-
-    const feed = await parser.parseURL(feedUrl);
+    // 🔥 MULTIPLE RSS SOURCES (Hindi + Rajasthan)
+    const feeds = [
+      "https://www.amarujala.com/rss/rajasthan-news.xml",
+      "https://zeenews.india.com/hindi/india/rajasthan.xml",
+      "https://news.google.com/rss/search?q=rajasthan&hl=hi&gl=IN&ceid=IN:hi"
+    ];
 
     const keywords = [
       "राजस्थान","जयपुर","बीकानेर","झुंझुनूं","पिलानी","चिड़ावा",
       "जोधपुर","उदयपुर","कोटा","अजमेर","सीकर","अलवर"
     ];
 
-    const results = [];
+    let results = [];
 
-    for (const item of feed.items) {
-      const text = (item.title + " " + (item.contentSnippet || "")).toLowerCase();
+    // 🔁 LOOP ALL FEEDS
+    for (const url of feeds) {
+      try {
+        const feed = await parser.parseURL(url);
 
-      const isRajasthan = keywords.some(k => text.includes(k));
-      const isHindi = /[\u0900-\u097F]/.test(item.title);
+        feed.items.forEach(item => {
+          const text = (item.title + " " + (item.contentSnippet || "")).toLowerCase();
 
-      if (!isRajasthan || !isHindi) continue;
+          const isRajasthan = keywords.some(k => text.includes(k));
+          const isHindi = /[\u0900-\u097F]/.test(item.title);
 
-      results.push({
-        title: item.title,
-        url: item.link,   // ✅ KEEP GOOGLE LINK
-        source: "Google News"
-      });
+          if (!isRajasthan || !isHindi) return;
+
+          results.push({
+            title: item.title,
+            url: item.link,   // ✅ REAL URL for AmarUjala/Zee
+            source: feed.title || "News"
+          });
+        });
+
+      } catch (err) {
+        console.log("Feed failed:", url);
+      }
     }
 
-    console.log("NEWS COUNT:", results.length);
+    // 🔥 REMOVE DUPLICATES
+    const unique = [];
+    const seen = new Set();
 
-    res.status(200).json(results.slice(0, 20));
+    for (const item of results) {
+      if (!seen.has(item.title)) {
+        seen.add(item.title);
+        unique.push(item);
+      }
+    }
+
+    console.log("FINAL NEWS COUNT:", unique.length);
+
+    res.status(200).json(unique.slice(0, 20));
 
   } catch (err) {
     console.error(err);
