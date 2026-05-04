@@ -136,6 +136,13 @@ async function loadChart(){
   })
 }
 
+function openEditor(title, url) {
+  localStorage.setItem("news_title", title);
+  localStorage.setItem("news_url", url);
+
+  window.location.href = "editor.html";
+}
+
 async function loadNews() {
   const res = await fetch("/api/fetch-news");
   const data = await res.json();
@@ -148,7 +155,9 @@ async function loadNews() {
       <div style="border:1px solid #ccc; padding:10px; margin:10px;">
         <h3>${news.title}</h3>
         <p>${news.description || ""}</p>
-        <button onclick="generateArticle('${news.url}')">
+        <button onclick="openEditor('${news.title}', '${news.url}')">
+  Open in Editor
+</button>
           Generate Hindi Article
         </button>
       </div>

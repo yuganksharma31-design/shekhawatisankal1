@@ -84,7 +84,14 @@ body{background:#f5f5f5;font-family:Arial;}
 
 </div>
 </div>
+<input id="title" placeholder="Title" style="width:100%; padding:10px;" />
 
+<p>Source: <span id="source"></span></p>
+
+<textarea id="content" placeholder="Write Hindi article here..."
+  style="width:100%; height:300px;"></textarea>
+
+<button onclick="publishArticle()">Publish</button>
 </div>
 </div>
 
@@ -130,6 +137,15 @@ document.getElementById("imageInput").addEventListener("change", e=>{
 })
 
 /* ================= LOAD ================= */
+
+window.onload = function () {
+  const title = localStorage.getItem("news_title");
+  const url = localStorage.getItem("news_url");
+
+  document.getElementById("title").value = title || "";
+  document.getElementById("source").innerText = url || "";
+};
+
 async function loadArticles(){
   const { data } = await supabase.from("articles").select("*")
 
@@ -147,6 +163,23 @@ async function loadArticles(){
       </td>
     </tr>`
   })
+}
+
+function publishArticle() {
+  const article = {
+    title: document.getElementById("title").value,
+    content: document.getElementById("content").value,
+    source: document.getElementById("source").innerText,
+    date: new Date().toISOString()
+  };
+
+  let articles = JSON.parse(localStorage.getItem("articles")) || [];
+  articles.push(article);
+
+  localStorage.setItem("articles", JSON.stringify(articles));
+
+  alert("Article Published!");
+  window.location.href = "admin.html";
 }
 
 /* ================= DELETE ================= */
@@ -227,7 +260,7 @@ document.getElementById("articleForm").addEventListener("submit", async e=>{
 
 /* ================= INIT ================= */
 loadArticles()
-
+publishArticle()
 </script>
 
 </body>
