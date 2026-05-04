@@ -53,6 +53,9 @@ placeholder="Optional: SEO / short / headings">
 <div class="d-flex gap-2 mt-2">
 <button type="button" class="btn btn-primary" onclick="openChatGPT()">🤖 ChatGPT</button>
 <button type="button" class="btn btn-success" onclick="openGemini()">✨ Gemini</button>
+<button type="button" class="btn btn-warning mt-2 w-100" onclick="autoGenerate()">
+⚡ Auto Generate Article
+</button>
 </div>
 
 <select id="category" class="form-control mt-3">
@@ -114,7 +117,46 @@ window.logout = function(){
   localStorage.removeItem("editorAuth")
   location.reload()
 }
+window.autoGenerate = async function () {
+  const url = document.getElementById("sourceInput").value;
 
+  if (!url) {
+    alert("Please enter source URL");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/generate-article", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url })
+    });
+
+    const data = await res.json();
+
+    if (!data.title) {
+      alert("Failed to generate article");
+      return;
+    }
+
+    // ✅ Fill editor automatically
+    document.getElementById("titleInput").value = data.title;
+    quill.root.innerHTML = data.content;
+
+    if (data.image) {
+      document.getElementById("preview").src = data.image;
+      currentImage = data.image;
+    }
+
+    alert("Article generated ✅");
+
+  } catch (err) {
+    console.error(err);
+    alert("Error generating article");
+  }
+};
 /* SUPABASE */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
