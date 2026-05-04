@@ -145,15 +145,25 @@ function openEditor(title, url) {
 
 async function loadNews() {
   try {
+    console.log("Fetching news...");
+
     const res = await fetch("/api/fetch-news");
     const data = await res.json();
-     console.log("Fetching news...");
+
+    console.log("DATA:", data);
+
     const container = document.getElementById("news-list");
+
+    if (!container) {
+      console.error("news-list div not found ❌");
+      return;
+    }
+
     container.innerHTML = "";
 
     data.forEach((news) => {
       container.innerHTML += `
-        <div style="border:1px solid #ddd; padding:15px; margin-bottom:15px;">
+        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
           <h3>${news.title}</h3>
           <p>${news.description || ""}</p>
 
@@ -165,7 +175,8 @@ async function loadNews() {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("ERROR:", err);
+    alert("Failed to load news");
   }
 }
 
@@ -175,12 +186,8 @@ function openEditor(title, url) {
   window.location.href = "editor.html";
 }
 
-
-
-
 /* INIT */
-
-loadNews()
+loadNews();
 </script>
 
 </body>
