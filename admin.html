@@ -74,7 +74,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.08);
 
 </div>
 
-<script type="module">
+<script>
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -136,14 +136,13 @@ async function loadChart(){
     }
   })
 }
-
-function openEditor(title, url) {
+window.openEditor = function (title, url) {
   localStorage.setItem("news_title", title);
   localStorage.setItem("news_url", url);
   window.location.href = "editor.html";
-}
+};
 
-async function loadNews() {
+window.loadNews = async function () {
   try {
     console.log("Fetching news...");
 
@@ -153,12 +152,6 @@ async function loadNews() {
     console.log("DATA RECEIVED:", data);
 
     const container = document.getElementById("news-list");
-
-    if (!container) {
-      alert("news-list div missing ❌");
-      return;
-    }
-
     container.innerHTML = "";
 
     data.forEach((news) => {
@@ -178,7 +171,7 @@ async function loadNews() {
     console.error("ERROR:", err);
     alert("Failed to load news");
   }
-}
+};
 
 /* INIT */
 loadNews();
