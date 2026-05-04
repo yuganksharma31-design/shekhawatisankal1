@@ -1,58 +1,48 @@
-import * as cheerio from "cheerio";
+import Parser from "rss-parser";
+const parser = new Parser();
 
 export default async function handler(req, res) {
   try {
-    const url = "https://rajasthan.ndtv.in/";
+    // 🔥 Google News RSS (Hindi + Rajasthan)
+    const feedUrl =
+      "https://news.google.com/rss/search?q=rajasthan&hl=hi&gl=IN&ceid=IN:hi";
 
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0"
-      }
-    });
+    const feed = await parser.parseURL(feedUrl);
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
+    const keywords = [
+      "rajasthan","jaipur","bikaner","jhunjhunu","pilani","chirawa",
+      "jodhpur","udaipur","kota","ajmer","sikar","alwar",
+      "राजस्थान","जयपुर","बीकानेर","झुंझुनूं","पिलानी","चिड़ावा","जोधपुर"
+    ];
 
     const results = [];
-    const base = "https://rajasthan.ndtv.in";
 
-    // 🔥 More flexible selector
-    $("a").each((i, el) => {
-      const title = $(el).text().trim();
-      let link = $(el).attr("href");
+    feed.items.forEach(item => {
+      const text = (item.title + " " + (item.contentSnippet || "")).toLowerCase();
 
-      // only news links
-      if (link && link.includes("/news/")) {
+      const isRajasthan = keywords.some(k => text.includes(k.toLowerCase()));
+      const isHindi = /[\u0900-\u097F]/.test(item.title);
 
-        const fullUrl = link.startsWith("http") ? link : base + link;
-
-        // avoid garbage links
-        if (title.length > 40) {
-          results.push({
-            title,
-            url: fullUrl,
-            source: "NDTV Rajasthan"
-          });
-        }
+      if (isRajasthan && isHindi) {
+        results.push({
+          title: item.title,
+          url: item.link,
+          source: "Google News"
+        });
       }
     });
 
-    // 🔥 remove duplicates
-    const unique = [];
-    const seen = new Set();
+    // 🔥 Fallback (never empty UI)
+    const finalData = results.length > 0 ? results : feed.items.map(i => ({
+      title: i.title,
+      url: i.link,
+      source: "Google News"
+    }));
 
-    for (let item of results) {
-      if (!seen.has(item.title)) {
-        seen.add(item.title);
-        unique.push(item);
-      }
-    }
-
-    res.status(200).json(unique.slice(0, 15));
+    res.status(200).json(finalData.slice(0, 20));
 
   } catch (err) {
-    console.error("SCRAPER ERROR:", err);
-
+    console.error(err);
     res.status(200).json([]);
   }
 }
