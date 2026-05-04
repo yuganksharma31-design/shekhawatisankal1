@@ -4,83 +4,47 @@ const parser = new Parser();
 
 export default async function handler(req, res) {
   try {
-    // 🔥 Multiple feeds (add more later if needed)
     const feeds = [
-      "https://feeds.feedburner.com/ndtvnews-rajasthan",
       "https://feeds.feedburner.com/ndtvnews-top-stories"
     ];
 
-    // 🔥 Your target keywords (Hindi + English mix)
     const keywords = [
-      "rajasthan",
-      "jaipur",
-      "bikaner",
-      "jhunjhunu",
-      "pilani",
-      "chirawa",
-      "jodhpur",
-      "udaipur",
-      "kota",
-      "ajmer",
-      "sikar",
-      "alwar",
-      "bharatpur",
-      "पाली",
-      "जयपुर",
-      "बीकानेर",
-      "झुंझुनूं",
-      "पिलानी",
-      "चिड़ावा",
-      "जोधपुर",
-      "उदयपुर",
-      "कोटा",
-      "अजमेर",
-      "सीकर",
-      "अलवर"
+      "rajasthan","jaipur","bikaner","jhunjhunu","pilani","chirawa",
+      "jodhpur","udaipur","kota","ajmer","sikar","alwar",
+      "जयपुर","बीकानेर","झुंझुनूं","पिलानी","चिड़ावा","जोधपुर"
     ];
 
     let allArticles = [];
 
-    // 🔥 Fetch all feeds
-    for (let feedUrl of feeds) {
-      const feed = await parser.parseURL(feedUrl);
+    for (let url of feeds) {
+      try {
+        const feed = await parser.parseURL(url);
 
-      const items = feed.items.map(item => ({
-        title: item.title || "",
-        url: item.link || "",
-        content: item.contentSnippet || "",
-        source: "NDTV"
-      }));
+        feed.items.forEach(item => {
+          allArticles.push({
+            title: item.title || "",
+            url: item.link || "",
+            content: item.contentSnippet || "",
+            source: "NDTV"
+          });
+        });
 
-      allArticles = allArticles.concat(items);
-    }
-
-    // 🔥 FILTER Rajasthan + city-based news
-    const filtered = allArticles.filter(article => {
-      const text = (article.title + " " + article.content).toLowerCase();
-
-      return keywords.some(k => text.includes(k.toLowerCase()));
-    });
-
-    // 🔥 REMOVE DUPLICATES
-    const unique = [];
-    const seen = new Set();
-
-    for (let item of filtered) {
-      if (!seen.has(item.title)) {
-        seen.add(item.title);
-        unique.push(item);
+      } catch (feedError) {
+        console.log("Feed failed:", url);
       }
     }
 
-    res.status(200).json(unique.slice(0, 20));
+    // 🔥 FILTER
+    const filtered = allArticles.filter(article => {
+      const text = (article.title + " " + article.content).toLowerCase();
+      return keywords.some(k => text.includes(k.toLowerCase()));
+    });
+
+    res.status(200).json(filtered.slice(0, 15));
 
   } catch (err) {
-    console.error("RSS ERROR:", err);
+    console.error("FINAL ERROR:", err);
 
-    res.status(500).json({
-      error: "RSS failed",
-      message: err.message
-    });
+    res.status(200).json([]); // 👈 IMPORTANT: never break frontend
   }
 }
