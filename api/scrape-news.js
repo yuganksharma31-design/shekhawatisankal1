@@ -1,6 +1,22 @@
 import Parser from "rss-parser";
 const parser = new Parser();
+const axios = require("axios");
 
+async function getRealUrl(googleUrl) {
+  try {
+    const res = await axios.get(googleUrl, {
+      maxRedirects: 5,
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
+    return res.request.res.responseUrl; // ✅ final redirected URL
+  } catch (err) {
+    console.log("Redirect failed:", googleUrl);
+    return googleUrl;
+  }
+}
 export default async function handler(req, res) {
   try {
     // 🔥 Google News RSS (Hindi + Rajasthan)
@@ -8,7 +24,17 @@ export default async function handler(req, res) {
       "https://news.google.com/rss/search?q=rajasthan&hl=hi&gl=IN&ceid=IN:hi";
 
     const feed = await parser.parseURL(feedUrl);
+    
+    if (isRajasthan && isHindi) {
 
+  const realUrl = await getRealUrl(item.link);
+
+  results.push({
+    title: item.title,
+    url: realUrl,   // ✅ FIXED
+    source: "Google News"
+  });
+}
     const keywords = [
       "rajasthan","jaipur","bikaner","jhunjhunu","pilani","chirawa",
       "jodhpur","udaipur","kota","ajmer","sikar","alwar",
