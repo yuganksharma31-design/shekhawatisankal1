@@ -126,13 +126,16 @@ window.autoGenerate = async function () {
   }
 
   try {
-    const res = await fetch("/api/generate-article", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url })
-    });
+ await fetch("/api/generate-article", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    url: document.getElementById("url").value,
+    title: document.getElementById("title").value
+  })
+});
 
     const data = await res.json();
 
