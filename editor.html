@@ -114,19 +114,28 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
 )
 
+
 window.onload = function () {
+  loadArticles();
+
   const title = localStorage.getItem("news_title");
   const url = localStorage.getItem("news_url");
 
-  document.getElementById("title").value = title || "";
-  document.getElementById("source").innerText = url || "";
+  if (title) {
+    document.getElementById("title").value = title;
+  }
+
+  if (url) {
+    document.getElementById("source").innerText = url;
+  }
 };
+
 
 function publishArticle() {
   const article = {
     title: document.getElementById("title").value,
     content: document.getElementById("content").value,
-    source: document.getElementById("source").innerText,
+    category: "Local",
     date: new Date().toISOString()
   };
 
@@ -135,8 +144,11 @@ function publishArticle() {
 
   localStorage.setItem("articles", JSON.stringify(articles));
 
-  alert("Article Published!");
+  alert("Published!");
+
+  loadArticles(); // 🔥 IMPORTANT
 }
+
 
 /* ================= EDITOR ================= */
 var quill = new Quill('#editor',{theme:'snow'})
@@ -152,6 +164,26 @@ document.getElementById("imageInput").addEventListener("change", e=>{
 })
 
 /* ================= LOAD ================= */
+
+function loadArticles() {
+  const articles = JSON.parse(localStorage.getItem("articles")) || [];
+
+  const table = document.getElementById("articlesTable");
+  table.innerHTML = "";
+
+  articles.forEach((article, index) => {
+    table.innerHTML += `
+      <tr>
+        <td>${article.title}</td>
+        <td>${article.category || "Local"}</td>
+        <td>
+          <button onclick="editArticle(${index})">Edit</button>
+          <button onclick="deleteArticle(${index})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
 
 window.onload = function () {
@@ -205,7 +237,20 @@ window.deleteArticle = async function(id){
   await supabase.from("articles").delete().eq("id",id)
   loadArticles()
 }
+function deleteArticle(index) {
+  let articles = JSON.parse(localStorage.getItem("articles")) || [];
+  articles.splice(index, 1);
+  localStorage.setItem("articles", JSON.stringify(articles));
+  loadArticles();
+}
 
+function editArticle(index) {
+  let articles = JSON.parse(localStorage.getItem("articles")) || [];
+  const article = articles[index];
+
+  document.getElementById("title").value = article.title;
+  document.getElementById("content").value = article.content;
+}
 /* ================= EDIT ================= */
 window.editArticle = async function(id){
   const { data } = await supabase
@@ -272,12 +317,13 @@ document.getElementById("articleForm").addEventListener("submit", async e=>{
   document.getElementById("preview").src=""
   currentImage=""
 
-  loadArticles()
+  
 })
 
 /* ================= INIT ================= */
 loadArticles()
 publishArticle()
+loadArticles()
 </script>
 
 </body>

@@ -147,7 +147,7 @@ async function loadNews() {
   try {
     const res = await fetch("/api/fetch-news");
     const data = await res.json();
-
+     console.log("Fetching news...");
     const container = document.getElementById("news-list");
     container.innerHTML = "";
 
