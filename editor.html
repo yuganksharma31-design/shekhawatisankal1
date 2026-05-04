@@ -118,40 +118,33 @@ window.logout = function(){
   location.reload()
 }
 window.autoGenerate = async function () {
-  const url = document.getElementById("sourceInput").value;
-
-  if (!url) {
-    alert("Please enter source URL");
-    return;
-  }
-
   try {
- await fetch("/api/generate-article", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    url: document.getElementById("url").value,
-    title: document.getElementById("title").value
-  })
-});
+    const url = document.getElementById("sourceInput").value;
+    const title = document.getElementById("titleInput").value;
 
-    const data = await res.json();
-
-    if (!data.title) {
-      alert("Failed to generate article");
+    if (!url) {
+      alert("Please enter source URL");
       return;
     }
 
-    // ✅ Fill editor automatically
-    document.getElementById("titleInput").value = data.title;
-    quill.root.innerHTML = data.content;
+    const res = await fetch("/api/generate-article", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url, title }),
+    });
 
-    if (data.image) {
-      document.getElementById("preview").src = data.image;
-      currentImage = data.image;
+    const data = await res.json();
+
+    if (!data.content) {
+      alert("Failed to generate article");
+      console.log(data);
+      return;
     }
+
+    // ✅ fill editor
+    quill.root.innerHTML = data.content;
 
     alert("Article generated ✅");
 
