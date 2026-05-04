@@ -1,77 +1,85 @@
-import * as cheerio from "cheerio";
+import Parser from "rss-parser";
+
+const parser = new Parser();
 
 export default async function handler(req, res) {
   try {
-    const results = [];
+    // 🔥 Multiple feeds (add more later if needed)
+    const feeds = [
+      "https://feeds.feedburner.com/ndtvnews-rajasthan",
+      "https://feeds.feedburner.com/ndtvnews-top-stories"
+    ];
 
-    // ===== NDTV =====
-    const ndtvRes = await fetch("https://rajasthan.ndtv.in/", {
-      headers: { "User-Agent": "Mozilla/5.0" }
+    // 🔥 Your target keywords (Hindi + English mix)
+    const keywords = [
+      "rajasthan",
+      "jaipur",
+      "bikaner",
+      "jhunjhunu",
+      "pilani",
+      "chirawa",
+      "jodhpur",
+      "udaipur",
+      "kota",
+      "ajmer",
+      "sikar",
+      "alwar",
+      "bharatpur",
+      "पाली",
+      "जयपुर",
+      "बीकानेर",
+      "झुंझुनूं",
+      "पिलानी",
+      "चिड़ावा",
+      "जोधपुर",
+      "उदयपुर",
+      "कोटा",
+      "अजमेर",
+      "सीकर",
+      "अलवर"
+    ];
+
+    let allArticles = [];
+
+    // 🔥 Fetch all feeds
+    for (let feedUrl of feeds) {
+      const feed = await parser.parseURL(feedUrl);
+
+      const items = feed.items.map(item => ({
+        title: item.title || "",
+        url: item.link || "",
+        content: item.contentSnippet || "",
+        source: "NDTV"
+      }));
+
+      allArticles = allArticles.concat(items);
+    }
+
+    // 🔥 FILTER Rajasthan + city-based news
+    const filtered = allArticles.filter(article => {
+      const text = (article.title + " " + article.content).toLowerCase();
+
+      return keywords.some(k => text.includes(k.toLowerCase()));
     });
 
-    const ndtvHtml = await ndtvRes.text();
-    const $ndtv = cheerio.load(ndtvHtml);
-
-    const baseNDTV = "https://rajasthan.ndtv.in";
-
-    $ndtv("a[href*='/news/']").each((i, el) => {
-      const title = $ndtv(el).text().trim();
-      const url = $ndtv(el).attr("href");
-
-      const fullUrl = url.startsWith("http") ? url : baseNDTV + url;
-
-      if (title.length > 30) {
-        results.push({
-          title,
-          url: fullUrl,
-          source: "NDTV"
-        });
-      }
-    });
-
-    // ===== NEWS18 =====
-    const news18Res = await fetch("https://hindi.news18.com/rajasthan/", {
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
-
-    const news18Html = await news18Res.text();
-    const $news18 = cheerio.load(news18Html);
-
-    const baseNews18 = "https://hindi.news18.com";
-
-    $news18("a[href*='/news/']").each((i, el) => {
-      const title = $news18(el).text().trim();
-      const url = $news18(el).attr("href");
-
-      const fullUrl = url.startsWith("http") ? url : baseNews18 + url;
-
-      if (title.length > 30) {
-        results.push({
-          title,
-          url: fullUrl,
-          source: "News18"
-        });
-      }
-    });
-
-    // ===== REMOVE DUPLICATES =====
+    // 🔥 REMOVE DUPLICATES
     const unique = [];
     const seen = new Set();
 
-    for (let item of results) {
+    for (let item of filtered) {
       if (!seen.has(item.title)) {
         seen.add(item.title);
         unique.push(item);
       }
     }
 
-    res.status(200).json(unique.slice(0, 15));
+    res.status(200).json(unique.slice(0, 20));
 
   } catch (err) {
-    console.error(err);
+    console.error("RSS ERROR:", err);
 
     res.status(500).json({
-      error: "Scraping failed",
+      error: "RSS failed",
       message: err.message
     });
   }
