@@ -3,26 +3,17 @@ import axios from "axios";
 
 const parser = new Parser();
 
-// 🔥 Get REAL article URL (remove Google redirect)
+// 🔥 Resolve Google redirect → real URL
 async function getRealUrl(googleUrl) {
   try {
     const res = await axios.get(googleUrl, {
-      maxRedirects: 10,
-      validateStatus: () => true,
+      maxRedirects: 5,
       headers: {
         "User-Agent": "Mozilla/5.0"
       }
     });
 
-    const finalUrl = res.request?.res?.responseUrl;
-
-    // ❌ skip invalid or still Google links
-    if (!finalUrl || finalUrl.includes("news.google.com")) {
-      return null;
-    }
-
-    return finalUrl;
-
+    return res.request.res.responseUrl;
   } catch {
     return null;
   }
@@ -30,14 +21,11 @@ async function getRealUrl(googleUrl) {
 
 export default async function handler(req, res) {
   try {
-
-    // 🔥 Google News RSS (Hindi + Rajasthan)
     const feedUrl =
       "https://news.google.com/rss/search?q=rajasthan&hl=hi&gl=IN&ceid=IN:hi";
 
     const feed = await parser.parseURL(feedUrl);
 
-    // 🔥 Rajasthan + cities keywords
     const keywords = [
       "राजस्थान","जयपुर","बीकानेर","झुंझुनूं","पिलानी","चिड़ावा",
       "जोधपुर","उदयपुर","कोटा","अजमेर","सीकर","अलवर"
@@ -45,22 +33,21 @@ export default async function handler(req, res) {
 
     const results = [];
 
+    // ✅ USE FOR LOOP (NOT forEach)
     for (const item of feed.items) {
 
       const text = (item.title + " " + (item.contentSnippet || "")).toLowerCase();
 
-      const isRajasthan = keywords.some(k => text.includes(k.toLowerCase()));
+      const isRajasthan = keywords.some(k => text.includes(k));
       const isHindi = /[\u0900-\u097F]/.test(item.title);
 
       if (!isRajasthan || !isHindi) continue;
 
-      // 🔥 Convert to real URL
+      // 🔥 get real URL
       const realUrl = await getRealUrl(item.link);
 
-      if (!realUrl) continue;
-
-      // 🔥 avoid duplicates
-      if (results.some(r => r.url === realUrl)) continue;
+      // ❌ skip if still Google link
+      if (!realUrl || realUrl.includes("news.google.com")) continue;
 
       results.push({
         title: item.title,
@@ -69,22 +56,12 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log("FINAL NEWS COUNT:", results.length);
+    console.log("FINAL NEWS:", results.length);
 
-    // 🔥 fallback (never empty UI)
-    const finalData =
-      results.length > 0
-        ? results
-        : feed.items.map(i => ({
-            title: i.title,
-            url: i.link,
-            source: "Google News"
-          }));
-
-    res.status(200).json(finalData.slice(0, 20));
+    res.status(200).json(results.slice(0, 20));
 
   } catch (err) {
-    console.error("ERROR:", err.message);
+    console.error(err);
     res.status(200).json([]);
   }
 }

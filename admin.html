@@ -35,9 +35,7 @@ body{
 <div class="container">
 <span class="navbar-brand">Shekhawati Sankalp Admin Dashboard</span>
 <a href="/" class="btn btn-outline-light btn-sm">View Website</a>
-<button onclick="logout()" class="btn btn-danger btn-sm ms-2">
-  Logout
-</button>
+<button onclick="logout()" class="btn btn-danger btn-sm ms-2">Logout</button>
 </div>
 </nav>
 
@@ -45,7 +43,6 @@ body{
 
 <div class="row">
 
-<!-- TOTAL ARTICLES -->
 <div class="col-md-4">
 <div class="card p-4 text-center">
 <h5>Total Articles</h5>
@@ -53,7 +50,6 @@ body{
 </div>
 </div>
 
-<!-- TOTAL VIEWS -->
 <div class="col-md-4">
 <div class="card p-4 text-center">
 <h5>Total Views</h5>
@@ -61,7 +57,6 @@ body{
 </div>
 </div>
 
-<!-- TOTAL EDITORS -->
 <div class="col-md-4">
 <div class="card p-4 text-center">
 <h5>Editors</h5>
@@ -71,29 +66,21 @@ body{
 
 </div>
 
-<!-- LOAD NEWS -->
 <div class="mt-4">
 <button class="btn btn-dark w-100" onclick="loadNews()">Load News</button>
 <div id="news-list"></div>
 </div>
 
-<!-- CHART -->
 <div class="card p-4 mt-4">
 <h5 class="mb-3">Article Views</h5>
 <canvas id="viewsChart"></canvas>
 </div>
 
 </div>
-<script type="module">
-window.openEditor = function (title, url) {
-  localStorage.setItem("news_title", title);
-  localStorage.setItem("news_url", url);
-  window.location.href = "editor.html";
-};
-</script>
-<!-- ================= NORMAL SCRIPT (NO MODULE) ================= -->
+
+<!-- PASSWORD -->
 <script>
-const PASSWORD = "Utpal123"; // change this
+const PASSWORD = "Utpal123";
 
 if (localStorage.getItem("adminAuth") !== "true") {
   const input = prompt("Enter Admin Password:");
@@ -105,39 +92,47 @@ if (localStorage.getItem("adminAuth") !== "true") {
   }
 }
 
-window.logout = function () {
+function logout(){
   localStorage.removeItem("adminAuth");
   window.location.href = "/";
-};
+}
+</script>
+
+<!-- MAIN SCRIPT -->
+<script>
 
 function cleanGoogleUrl(url) {
   try {
     const decoded = decodeURIComponent(url);
-
-    // extract real link from Google URL
     const match = decoded.match(/https?:\/\/[^&]+/);
-
     return match ? match[0] : url;
-  } catch (e) {
+  } catch {
     return url;
   }
 }
+
+window.openEditor = function (title, url) {
+  const cleanUrl = cleanGoogleUrl(url);
+
+  console.log("FINAL URL:", cleanUrl); // DEBUG
+
+  localStorage.setItem("news_title", title);
+  localStorage.setItem("news_url", cleanUrl);
+
+  window.location.href = "editor.html";
+};
 
 window.loadNews = async function () {
   try {
     console.log("Fetching news...");
 
-    const res = await fetch("/api/scrape-news")
+    const res = await fetch("/api/scrape-news");
 
-if (!res.ok) {
-  throw new Error("API failed");
-}
+    if (!res.ok) throw new Error("API failed");
 
-const data = await res.json();
+    const data = await res.json();
 
-if (!Array.isArray(data)) {
-  throw new Error("Invalid data format");
-}
+    if (!Array.isArray(data)) throw new Error("Invalid data");
 
     console.log("DATA:", data);
 
@@ -145,19 +140,16 @@ if (!Array.isArray(data)) {
     container.innerHTML = "";
 
     data.forEach((news) => {
+
       container.innerHTML += `
         <div class="news-card">
           <h5>${news.title}</h5>
-          <p>${news.description || ""}</p>
 
           <button class="btn btn-sm btn-primary"
-  onclick='openEditor(
-    ${JSON.stringify(news.title)},
-    ${JSON.stringify(cleanGoogleUrl(news.url))}
-  )'>
-  Open in Editor
-</button>
- </div>
+            onclick="openEditor('${news.title.replace(/'/g, "")}', '${news.url}')">
+            Open in Editor
+          </button>
+        </div>
       `;
     });
 
@@ -169,9 +161,8 @@ if (!Array.isArray(data)) {
 
 </script>
 
-<!-- ================= SUPABASE (SEPARATE MODULE) ================= -->
+<!-- SUPABASE -->
 <script type="module">
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabase = createClient(
@@ -181,7 +172,6 @@ const supabase = createClient(
 
 async function loadStats(){
   const { data } = await supabase.from("articles").select("*")
-
   document.getElementById("totalArticles").innerText = data.length
   document.getElementById("totalViews").innerText = data.length * 25
 }
@@ -194,17 +184,13 @@ async function loadChart(){
 
   new Chart(document.getElementById("viewsChart"),{
     type:"bar",
-    data:{
-      labels:labels,
-      datasets:[{ label:"Views", data:views }]
-    },
-    options:{ responsive:true, plugins:{ legend:{display:false} } }
+    data:{ labels, datasets:[{ data:views }] },
+    options:{ plugins:{ legend:{display:false} } }
   })
 }
 
 loadStats()
 loadChart()
-
 </script>
 
 </body>
