@@ -212,11 +212,14 @@ window.editArticle = async function(id){
 document.getElementById("articleForm").addEventListener("submit", async e=>{
   e.preventDefault()
 
-  const title = titleInput.value
-  const source_url = sourceInput.value
+  const title = document.getElementById("titleInput").value
+  const source_url = document.getElementById("sourceInput").value
   const content = quill.root.innerHTML
-  const category = category.value
-  const author = author.value
+
+  // ✅ FIX HERE
+  const category = document.getElementById("category").value
+  const author = document.getElementById("author").value
+
 
   const file = imageInput.files[0]
   let imageUrl = currentImage
