@@ -168,7 +168,7 @@ window.openGemini = function () {
     return;
   }
 
-  const prompt = `${custom}\n\nRewrite this news article in good Hindi:\n${url}`;
+  const prompt = `${custom}\n\nRewrite this news article in good Hindi and give me the image for this article:\n${url}`;
   window.open("https://gemini.google.com/app?prompt=" + encodeURIComponent(prompt), "_blank");
 };
 /* ================= IMAGE ================= */
