@@ -96,7 +96,16 @@ window.loadNews = async function () {
     console.log("Fetching news...");
 
     const res = await fetch("/api/fetch-news");
-    const data = await res.json();
+
+if (!res.ok) {
+  throw new Error("API failed");
+}
+
+const data = await res.json();
+
+if (!Array.isArray(data)) {
+  throw new Error("Invalid data format");
+}
 
     console.log("DATA:", data);
 
