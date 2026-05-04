@@ -1,53 +1,56 @@
+import Parser from "rss-parser";
 import axios from "axios";
-import * as cheerio from "cheerio";
+
+const parser = new Parser();
+
+async function getRealUrl(googleUrl) {
+  try {
+    const res = await axios.get(googleUrl, {
+      maxRedirects: 5,
+      headers: { "User-Agent": "Mozilla/5.0" }
+    });
+
+    return res.request.res.responseUrl;
+  } catch {
+    return googleUrl;
+  }
+}
 
 export default async function handler(req, res) {
   try {
-    const url = "https://rajasthan.ndtv.in/";
+    const feedUrl =
+      "https://news.google.com/rss/search?q=rajasthan&hl=hi&gl=IN&ceid=IN:hi";
 
-    const { data } = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0"
-      }
-    });
+    const feed = await parser.parseURL(feedUrl);
 
-    const $ = cheerio.load(data);
+    const keywords = [
+      "राजस्थान","जयपुर","बीकानेर","झुंझुनूं","पिलानी","चिड़ावा",
+      "जोधपुर","उदयपुर","कोटा","अजमेर","सीकर","अलवर"
+    ];
 
     const results = [];
 
-    // ✅ Target real article blocks (NDTV specific)
-    $(".news_Itm, .nstory_card, .newsHdng a").each((i, el) => {
+    for (const item of feed.items) {
+      const text = (item.title + " " + (item.contentSnippet || "")).toLowerCase();
 
-      const title = $(el).text().trim();
-      let link = $(el).attr("href");
+      const isRajasthan = keywords.some(k => text.includes(k.toLowerCase()));
+      const isHindi = /[\u0900-\u097F]/.test(item.title);
 
-      if (!title || !link) return;
+      if (isRajasthan && isHindi) {
+        const realUrl = await getRealUrl(item.link);
 
-      // fix relative URLs
-      if (!link.startsWith("http")) {
-        link = "https://rajasthan.ndtv.in" + link;
+        results.push({
+          title: item.title,
+          url: realUrl,   // ✅ FIXED REAL URL
+          source: "Google News"
+        });
       }
-
-      // filter Hindi
-      const isHindi = /[\u0900-\u097F]/.test(title);
-      if (!isHindi) return;
-
-      // avoid duplicates
-      if (results.some(item => item.url === link)) return;
-
-      results.push({
-        title,
-        url: link,
-        source: "NDTV Rajasthan"
-      });
-    });
-
-    console.log("SCRAPED:", results.length);
+    }
 
     res.status(200).json(results.slice(0, 20));
 
-  } catch (error) {
-    console.error("SCRAPER ERROR:", error.message);
+  } catch (err) {
+    console.error(err);
     res.status(200).json([]);
   }
 }
