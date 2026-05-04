@@ -46,6 +46,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.08);
 </div>
 </div>
 <button onclick="loadNews()">Load News</button>
+<div id="news-list" style="margin-top:20px;"></div>
 <div id="news-list"></div>
 <!-- TOTAL VIEWS -->
 <div class="col-md-4">
@@ -139,7 +140,6 @@ async function loadChart(){
 function openEditor(title, url) {
   localStorage.setItem("news_title", title);
   localStorage.setItem("news_url", url);
-
   window.location.href = "editor.html";
 }
 
@@ -150,12 +150,12 @@ async function loadNews() {
     const res = await fetch("/api/fetch-news");
     const data = await res.json();
 
-    console.log("DATA:", data);
+    console.log("DATA RECEIVED:", data);
 
     const container = document.getElementById("news-list");
 
     if (!container) {
-      console.error("news-list div not found ❌");
+      alert("news-list div missing ❌");
       return;
     }
 
@@ -178,12 +178,6 @@ async function loadNews() {
     console.error("ERROR:", err);
     alert("Failed to load news");
   }
-}
-
-function openEditor(title, url) {
-  localStorage.setItem("news_title", title);
-  localStorage.setItem("news_url", url);
-  window.location.href = "editor.html";
 }
 
 /* INIT */
