@@ -113,7 +113,7 @@ window.loadNews = async function () {
   try {
     console.log("Fetching news...");
 
-    const res = await fetch("/api/fetch-news");
+    const res = await fetch("/api/scrape-news")
 
 if (!res.ok) {
   throw new Error("API failed");
