@@ -15,27 +15,25 @@ export default async function handler(req, res) {
 
     const results = [];
 
-    // 🔥 NDTV Rajasthan articles
-    $("a").each((i, el) => {
+    // ✅ Target real article blocks (NDTV specific)
+    $(".news_Itm, .nstory_card, .newsHdng a").each((i, el) => {
+
       const title = $(el).text().trim();
       let link = $(el).attr("href");
 
       if (!title || !link) return;
-
-      // only news links
-      if (!link.includes("rajasthan") && !link.includes("news")) return;
 
       // fix relative URLs
       if (!link.startsWith("http")) {
         link = "https://rajasthan.ndtv.in" + link;
       }
 
-      // remove duplicates
-      if (results.find(item => item.url === link)) return;
-
-      // only Hindi titles
+      // filter Hindi
       const isHindi = /[\u0900-\u097F]/.test(title);
       if (!isHindi) return;
+
+      // avoid duplicates
+      if (results.some(item => item.url === link)) return;
 
       results.push({
         title,
@@ -44,11 +42,12 @@ export default async function handler(req, res) {
       });
     });
 
-    // limit results
+    console.log("SCRAPED:", results.length);
+
     res.status(200).json(results.slice(0, 20));
 
   } catch (error) {
     console.error("SCRAPER ERROR:", error.message);
-    res.status(200).json([]); // never break UI
+    res.status(200).json([]);
   }
 }
