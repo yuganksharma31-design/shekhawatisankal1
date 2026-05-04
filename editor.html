@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <title>शेखावाटी संकल्प</title>
 
@@ -42,33 +41,26 @@ body{background:#f5f5f5;font-family:Arial;}
 
 <form id="articleForm">
 
-<input name="title" id="titleInput" class="form-control mb-3" placeholder="Title" required>
+<input id="titleInput" class="form-control mb-3" placeholder="Title" required>
 
 <input id="sourceInput" class="form-control mb-2" placeholder="Source URL">
 
-<!-- 🔥 AI PROMPT -->
 <input id="aiPrompt" class="form-control mb-2"
-placeholder="Optional: e.g. make it short, SEO friendly, add headings">
+placeholder="Optional: SEO / short / headings">
 
 <div id="editor"></div>
 
-<!-- 🔥 AI BUTTONS -->
 <div class="d-flex gap-2 mt-2">
-  <button type="button" class="btn btn-primary" onclick="openChatGPT()">
-    🤖 ChatGPT
-  </button>
-
-  <button type="button" class="btn btn-success" onclick="openGemini()">
-    ✨ Gemini
-  </button>
+<button type="button" class="btn btn-primary" onclick="openChatGPT()">🤖 ChatGPT</button>
+<button type="button" class="btn btn-success" onclick="openGemini()">✨ Gemini</button>
 </div>
 
-<select name="category" class="form-control mt-3">
+<select id="category" class="form-control mt-3">
 <option>Local</option>
 <option>Trending</option>
 </select>
 
-<input name="author" class="form-control mt-3" placeholder="Author">
+<input id="author" class="form-control mt-3" placeholder="Author">
 
 <img id="preview">
 <input type="file" id="imageInput" class="form-control mt-2">
@@ -105,7 +97,7 @@ placeholder="Optional: e.g. make it short, SEO friendly, add headings">
 
 <script type="module">
 
-/* ================= PASSWORD ================= */
+/* PASSWORD */
 const PASSWORD = "Utpal123"
 
 if(localStorage.getItem("editorAuth") !== "true"){
@@ -123,7 +115,7 @@ window.logout = function(){
   location.reload()
 }
 
-/* ================= SUPABASE ================= */
+/* SUPABASE */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabase = createClient(
@@ -131,47 +123,41 @@ const supabase = createClient(
   "sb_publishable_6YSkqow_qsYyEIaQ37FSQw_Icrsgxs9"
 )
 
-/* ================= EDITOR ================= */
+/* EDITOR */
 var quill = new Quill('#editor',{theme:'snow'})
 let currentImage = ""
 
-/* ================= PREFILL ================= */
+/* PREFILL */
 window.onload = function () {
-  const title = localStorage.getItem("news_title");
-  const url = localStorage.getItem("news_url");
+  const title = localStorage.getItem("news_title")
+  const url = localStorage.getItem("news_url")
 
-  if(title) document.getElementById("titleInput").value = title;
-  if(url) document.getElementById("sourceInput").value = url;
+  if(title) document.getElementById("titleInput").value = title
+  if(url) document.getElementById("sourceInput").value = url
 
-  loadArticles();
+  loadArticles()
 }
 
-/* ================= AI BUTTONS ================= */window.openChatGPT = function () {
-  const url = document.getElementById("sourceInput").value;
-  const custom = document.getElementById("aiPrompt").value || "";
+/* AI */
+window.openChatGPT = function () {
+  const url = document.getElementById("sourceInput").value
+  if (!url) return alert("No URL")
 
-  if (!url) {
-    alert("No source URL");
-    return;
-  }
-
-  const prompt = `Rewrite this news article in good Hindi and give image:\n\n${url}`;
-  window.open("https://chat.openai.com/?q=" + encodeURIComponent(prompt), "_blank");
-};
+  const prompt = `Rewrite this news article in good Hindi and give image:\n\n${url}`
+  window.open("https://chat.openai.com/?q=" + encodeURIComponent(prompt))
+}
 
 window.openGemini = function () {
-  const url = document.getElementById("sourceInput").value;
-  const custom = document.getElementById("aiPrompt").value || "";
+  const url = document.getElementById("sourceInput").value
+  const custom = document.getElementById("aiPrompt").value || ""
 
-  if (!url) {
-    alert("No source URL");
-    return;
-  }
+  if (!url) return alert("No URL")
 
-  const prompt = `${custom}\n\nRewrite this news article in good Hindi and give me the image for this article:\n${url}`;
-  window.open("https://gemini.google.com/app?prompt=" + encodeURIComponent(prompt), "_blank");
-};
-/* ================= IMAGE ================= */
+  const prompt = `${custom}\n\nRewrite this news article in Hindi:\n${url}`
+  window.open("https://gemini.google.com/app?prompt=" + encodeURIComponent(prompt))
+}
+
+/* IMAGE */
 document.getElementById("imageInput").addEventListener("change", e=>{
   const file = e.target.files[0]
   if(file){
@@ -179,69 +165,70 @@ document.getElementById("imageInput").addEventListener("change", e=>{
   }
 })
 
-/* ================= LOAD ================= */
+/* LOAD */
 async function loadArticles(){
-  const { data } = await supabase.from("articles").select("*")
+  const { data } = await supabase.from("articles").select("*").order("created_at",{ascending:false})
 
   const table = document.getElementById("articleTable")
   table.innerHTML=""
 
   data.forEach(a=>{
     table.innerHTML+=`
-    <tr>
-      <td>${a.title}</td>
-      <td>${a.category}</td>
-      <td>
-        <button onclick="editArticle(${a.id})" class="btn btn-warning btn-sm">Edit</button>
-        <button onclick="deleteArticle(${a.id})" class="btn btn-danger btn-sm">Delete</button>
-      </td>
-    </tr>`
+      <tr>
+        <td>${a.title}</td>
+        <td>${a.category}</td>
+        <td>
+          <button onclick="editArticle(${a.id})" class="btn btn-warning btn-sm">Edit</button>
+          <button onclick="deleteArticle(${a.id})" class="btn btn-danger btn-sm">Delete</button>
+        </td>
+      </tr>`
   })
 }
 
-/* ================= DELETE ================= */
+/* DELETE */
 window.deleteArticle = async function(id){
-  if(!confirm("Delete this article?")) return
+  if(!confirm("Delete?")) return
   await supabase.from("articles").delete().eq("id",id)
   loadArticles()
 }
 
-/* ================= EDIT ================= */
+/* EDIT */
 window.editArticle = async function(id){
   const { data } = await supabase.from("articles").select("*").eq("id",id).single()
 
-  document.querySelector("input[name='title']").value = data.title
-  document.getElementById("sourceInput").value = data.source || ""
+  titleInput.value = data.title
+  sourceInput.value = data.source_url || ""
   quill.root.innerHTML = data.content
-  document.querySelector("select[name='category']").value = data.category
+  category.value = data.category
+  author.value = data.author
 
   currentImage = data.image || ""
-  document.getElementById("preview").src = currentImage
+  preview.src = currentImage
 
-  document.getElementById("articleForm").setAttribute("data-id",id)
+  articleForm.setAttribute("data-id",id)
 }
 
-/* ================= SUBMIT ================= */
+/* SUBMIT */
 document.getElementById("articleForm").addEventListener("submit", async e=>{
   e.preventDefault()
 
-  const title = document.querySelector("input[name='title']").value
-  const source = document.getElementById("sourceInput").value
+  const title = titleInput.value
+  const source_url = sourceInput.value
   const content = quill.root.innerHTML
-  const category = document.querySelector("select[name='category']").value
-  const author = document.querySelector("input[name='author']").value
+  const category = category.value
+  const author = author.value
 
-  const file = document.getElementById("imageInput").files[0]
+  const file = imageInput.files[0]
   let imageUrl = currentImage
 
   if(file){
-    const formData = new FormData()
-    formData.append("file",file)
-    formData.append("upload_preset","unsigned_upload")
+    const fd = new FormData()
+    fd.append("file",file)
+    fd.append("upload_preset","unsigned_upload")
 
     const res = await fetch("https://api.cloudinary.com/v1_1/dxtqp7bj0/image/upload",{
       method:"POST",
-      body:formData
+      body:fd
     })
 
     const data = await res.json()
@@ -251,20 +238,29 @@ document.getElementById("articleForm").addEventListener("submit", async e=>{
   const editId = e.target.getAttribute("data-id")
 
   if(editId){
-    await supabase.from("articles").update({title,content,category,author,image:imageUrl,source}).eq("id",editId)
+    await supabase.from("articles").update({
+      title, content, category, author,
+      image:imageUrl,
+      source_url
+    }).eq("id",editId)
+
     alert("Updated ✅")
   }else{
-    await supabase.from("articles").insert([{title,content,category,author,image:imageUrl,source,date:new Date()}])
+    await supabase.from("articles").insert([{
+      title, content, category, author,
+      image:imageUrl,
+      source_url,
+      created_at:new Date()
+    }])
+
     alert("Published ✅")
   }
 
   e.target.reset()
   quill.root.innerHTML=""
-  document.getElementById("preview").src=""
+  preview.src=""
   currentImage=""
-
-  localStorage.removeItem("news_title")
-  localStorage.removeItem("news_url")
+  localStorage.clear()
 
   loadArticles()
 })
