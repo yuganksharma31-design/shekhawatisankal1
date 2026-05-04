@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   try {
     const apiKey = "YOUR_API_KEY";
 
-    const url = `https://gnews.io/api/v4/search?q=rajasthan OR jaipur OR jodhpur OR udaipur&lang=hi&country=in&max=10&token=${apiKey}`;
+    const url = `https://gnews.io/api/v4/search?q=rajasthan&lang=hi&country=in&max=10&token=${apiKey}`;
 
     const response = await fetch(url);
 
