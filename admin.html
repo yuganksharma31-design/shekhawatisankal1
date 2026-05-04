@@ -84,7 +84,13 @@ body{
 </div>
 
 </div>
-
+<script type="module">
+window.openEditor = function (title, url) {
+  localStorage.setItem("news_title", title);
+  localStorage.setItem("news_url", url);
+  window.location.href = "editor.html";
+};
+</script>
 <!-- ================= NORMAL SCRIPT (NO MODULE) ================= -->
 <script>
 const PASSWORD = "Utpal123"; // change this
@@ -103,11 +109,7 @@ window.logout = function () {
   localStorage.removeItem("adminAuth");
   window.location.href = "/";
 };
-window.openEditor = function (title, url) {
-  localStorage.setItem("news_title", title);
-  localStorage.setItem("news_url", url);
-  window.location.href = "editor.html";
-};
+
 
 window.loadNews = async function () {
   try {
