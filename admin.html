@@ -110,6 +110,18 @@ window.logout = function () {
   window.location.href = "/";
 };
 
+function cleanGoogleUrl(url) {
+  try {
+    const decoded = decodeURIComponent(url);
+
+    // extract real link from Google URL
+    const match = decoded.match(/https?:\/\/[^&]+/);
+
+    return match ? match[0] : url;
+  } catch (e) {
+    return url;
+  }
+}
 
 window.loadNews = async function () {
   try {
@@ -139,10 +151,13 @@ if (!Array.isArray(data)) {
           <p>${news.description || ""}</p>
 
           <button class="btn btn-sm btn-primary"
-            onclick='openEditor(${JSON.stringify(news.title)}, ${JSON.stringify(news.url)})'>
-            Open in Editor
-          </button>
-        </div>
+  onclick='openEditor(
+    ${JSON.stringify(news.title)},
+    ${JSON.stringify(cleanGoogleUrl(news.url))}
+  )'>
+  Open in Editor
+</button>
+ </div>
       `;
     });
 
