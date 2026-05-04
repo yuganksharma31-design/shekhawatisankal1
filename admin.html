@@ -152,12 +152,15 @@ async function loadNews() {
 
   data.forEach((news, index) => {
     container.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <h3>${news.title}</h3>
-        <p>${news.description || ""}</p>
-        <button onclick="openEditor('${news.title}', '${news.url}')">
-  Open in Editor
-</button>
+  <div style="border:1px solid #ddd; padding:15px; margin-bottom:15px;">
+    <h3>${news.title}</h3>
+    <p>${news.description || ""}</p>
+
+    <button onclick='openEditor(${JSON.stringify(news.title)}, ${JSON.stringify(news.url)})'>
+      Open in Editor
+    </button>
+  </div>
+
           Generate Hindi Article
         </button>
       </div>

@@ -123,6 +123,14 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaWNzcnBqa2Vjb2d5ZXBraHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Mzg2ODMsImV4cCI6MjA5MzAxNDY4M30.0PCzEXXtvMTitvL1Oqq5jN4kqPIdrQhAPgrzPXnBi2E"
 )
 
+window.onload = function () {
+  const title = localStorage.getItem("news_title");
+  const url = localStorage.getItem("news_url");
+
+  document.getElementById("title").value = title || "";
+  document.getElementById("source").innerText = url || "";
+};
+
 /* ================= EDITOR ================= */
 var quill = new Quill('#editor',{theme:'snow'})
 
@@ -138,6 +146,7 @@ document.getElementById("imageInput").addEventListener("change", e=>{
 
 /* ================= LOAD ================= */
 
+
 window.onload = function () {
   const title = localStorage.getItem("news_title");
   const url = localStorage.getItem("news_url");
@@ -145,6 +154,7 @@ window.onload = function () {
   document.getElementById("title").value = title || "";
   document.getElementById("source").innerText = url || "";
 };
+
 
 async function loadArticles(){
   const { data } = await supabase.from("articles").select("*")
@@ -179,7 +189,7 @@ function publishArticle() {
   localStorage.setItem("articles", JSON.stringify(articles));
 
   alert("Article Published!");
-  window.location.href = "admin.html";
+
 }
 
 /* ================= DELETE ================= */
