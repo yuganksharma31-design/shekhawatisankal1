@@ -191,7 +191,9 @@ window.onload = function () {
   loadArticles()
 }
 window.autoFetchImage = async function () {
+
   try {
+
     const url = document.getElementById("sourceInput").value;
 
     if (!url) return;
@@ -207,17 +209,21 @@ window.autoFetchImage = async function () {
     console.log("IMAGE API:", data);
 
     if (data.image) {
+
       document.getElementById("preview").src = data.image;
+
       currentImage = data.image;
 
       console.log("IMAGE SET");
     }
 
   } catch (err) {
-    console.error(err);
-  }
-};
 
+    console.error(err);
+
+  }
+
+};
 /* AI */
 window.openChatGPT = function () {
   const url = document.getElementById("sourceInput").value
