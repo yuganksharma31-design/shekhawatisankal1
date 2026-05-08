@@ -121,7 +121,16 @@ window.autoGenerate = async function () {
   try {
     const url = document.getElementById("sourceInput").value;
     const title = document.getElementById("titleInput").value;
+    const imgRes = await fetch(
+  "/api/extract-image?url=" + encodeURIComponent(url)
+);
 
+const imgData = await imgRes.json();
+
+if (imgData.image) {
+  preview.src = imgData.image;
+  currentImage = imgData.image;
+}
     if (!url) {
       alert("Please enter source URL");
       return;
