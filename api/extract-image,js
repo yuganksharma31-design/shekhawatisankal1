@@ -19,22 +19,29 @@ export default async function handler(req, res) {
 
     const $ = cheerio.load(response.data);
 
-    // 🔥 Hero image
-    const image =
+    let image =
       $('meta[property="og:image"]').attr("content") ||
       $('meta[name="twitter:image"]').attr("content") ||
       $("img").first().attr("src") ||
       "";
 
-    res.status(200).json({
+    // 🔥 Fix relative URLs
+    if (image && image.startsWith("/")) {
+      const base = new URL(url).origin;
+      image = base + image;
+    }
+
+    console.log("EXTRACTED IMAGE:", image);
+
+    return res.status(200).json({
       image
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("IMAGE ERROR:", err);
 
-    res.status(500).json({
-      error: "Failed to extract image"
+    return res.status(500).json({
+      error: err.message
     });
   }
 }

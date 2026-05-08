@@ -44,6 +44,7 @@ body{background:#f5f5f5;font-family:Arial;}
 <input id="titleInput" class="form-control mb-3" placeholder="Title" required>
 
 <input
+
   id="sourceInput"
   class="form-control mb-2"
   placeholder="Source URL"
@@ -189,27 +190,33 @@ window.onload = function () {
 
   loadArticles()
 }
-async function autoFetchImage() {
-  const url = document.getElementById("sourceInput").value;
-
-  if (!url) return;
-
+window.autoFetchImage = async function () {
   try {
+    const url = document.getElementById("sourceInput").value;
+
+    if (!url) return;
+
+    console.log("Fetching image for:", url);
+
     const res = await fetch(
       "/api/extract-image?url=" + encodeURIComponent(url)
     );
 
     const data = await res.json();
 
+    console.log("IMAGE API:", data);
+
     if (data.image) {
       document.getElementById("preview").src = data.image;
       currentImage = data.image;
+
+      console.log("IMAGE SET");
     }
 
   } catch (err) {
     console.error(err);
   }
-}
+};
 
 /* AI */
 window.openChatGPT = function () {
