@@ -227,13 +227,33 @@ async function loadNews(){
 
 /* SIDEBAR */
 async function loadTrending(){
-  const articles = await getArticles()
-  const c = document.getElementById("trendingContainer")
-  c.innerHTML=""
+
+  const articles = await getArticles();
+
+  const c = document.getElementById("trendingContainer");
+
+  c.innerHTML = "";
 
   articles.slice(0,5).forEach(a=>{
-    c.innerHTML+=`<div><a href="article.html?id=${a.id}">${a.title}</a></div>`
-  })
+
+    c.innerHTML += `
+
+      <div class="latest-item">
+
+        <a href="article.html?id=${a.id}">
+          ${a.title}
+        </a>
+
+        <div class="latest-time">
+          🕒 Latest Update
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
 }
 
 /* BREAKING */
