@@ -156,55 +156,73 @@ async function loadHero(){
 
 /* GRID */
 async function loadNews(){
-  const articles = await getArticles()
 
-  const c = document.getElementById("newsContainer")
-  c.innerHTML = ""
+  const articles = await getArticles();
+
+  const c = document.getElementById("newsContainer");
+
+  c.innerHTML = "";
 
   if(!articles.length){
-    c.innerHTML = "<p>No news available</p>"
-    return
+
+    c.innerHTML = "<p>No news available</p>";
+
+    return;
+
   }
 
-  // 👉 ONLY TOP 3 LATEST
-  articles.slice(0,3).forEach(a=>{
+  articles.forEach(a => {
+
     c.innerHTML += `
+
       <div class="col-md-4">
-        <div class="article-card">
 
-  <img src="${article.image || '/logo.png'}">
+        <div class="news-card">
 
-  <h3>${article.title}</h3>
+          <img
+            src="${a.image || '/logo.png'}"
+            onerror="this.src='/logo.png'"
+          >
 
-  <a href="article.html?id=${article.id}">
-    Read More
-  </a>
-<div class="article-card">
+          <div class="p-3">
 
-  <img src="${article.image || '/logo.png'}">
+            <h5>${a.title}</h5>
 
-  <h3>${article.title}</h3>
+            <p>
+              ${a.content.substring(0,120)}...
+            </p>
 
-  <a href="article.html?id=${article.id}">
-    Read More
-  </a>
+            <a
+              href="article.html?id=${a.id}"
+              class="btn btn-dark btn-sm"
+            >
+              Read More
+            </a>
 
-  <button
-    class="btn btn-success btn-sm mt-2"
-    onclick="window.open(
-      'https://wa.me/?text=' + encodeURIComponent(window.location.href),
-      '_blank'
-    )"
-  >
-    📤 WhatsApp Share
-  </button>
+            <button
+              class="btn btn-success btn-sm ms-2"
+              onclick="window.open(
+                'https://wa.me/?text=' + encodeURIComponent(
+                  '${a.title} ' +
+                  window.location.origin +
+                  '/article.html?id=${a.id}'
+                ),
+                '_blank'
+              )"
+            >
+              📤 Share
+            </button>
 
-</div>
-</div>
+          </div>
+
         </div>
+
       </div>
-    `
-  })
+
+    `;
+
+  });
+
 }
 
 /* SIDEBAR */
