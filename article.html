@@ -62,7 +62,8 @@ color:#333;
 }
 
 </style>
-
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -210,16 +211,34 @@ loadArticle()
 loadBreaking()
 
 </script>
-<button
-  class="btn btn-success btn-sm mt-2"
-  onclick="window.open(
-    'https://wa.me/?text=' + encodeURIComponent(window.location.href),
-    '_blank'
-  )"
->
-WhatsApp Share
-</button>
-📤 Share
-</button>
+<div style="
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 999;
+">
+  
+  <button
+    onclick="window.open(
+      'https://wa.me/?text=' + encodeURIComponent(window.location.href),
+      '_blank'
+    )"
+    style="
+      width:60px;
+      height:60px;
+      border-radius:50%;
+      border:none;
+      background:#25D366;
+      color:white;
+      font-size:26px;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    "
+  >
+   <i class="fab fa-whatsapp"></i>
+  </button>
+
+</div>
+
 </body>
 </html>
