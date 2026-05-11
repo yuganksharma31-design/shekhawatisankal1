@@ -170,15 +170,37 @@ async function loadNews(){
   articles.slice(0,3).forEach(a=>{
     c.innerHTML += `
       <div class="col-md-4">
-        <div class="news-card">
-          <img src="${a.image || 'https://picsum.photos/400'}">
-          <div class="p-3">
-            <h5>${a.title}</h5>
-            <p>${a.content.substring(0,100)}...</p>
-            <a href="article.html?id=${a.id}" class="btn btn-dark btn-sm mt-2">
-              Read More
-            </a>
-          </div>
+        <div class="article-card">
+
+  <img src="${article.image || '/logo.png'}">
+
+  <h3>${article.title}</h3>
+
+  <a href="article.html?id=${article.id}">
+    Read More
+  </a>
+<div class="article-card">
+
+  <img src="${article.image || '/logo.png'}">
+
+  <h3>${article.title}</h3>
+
+  <a href="article.html?id=${article.id}">
+    Read More
+  </a>
+
+  <button
+    class="btn btn-success btn-sm mt-2"
+    onclick="window.open(
+      'https://wa.me/?text=' + encodeURIComponent(window.location.href),
+      '_blank'
+    )"
+  >
+    📤 WhatsApp Share
+  </button>
+
+</div>
+</div>
         </div>
       </div>
     `
