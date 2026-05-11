@@ -91,7 +91,17 @@ color:#333;
 <input id="searchInput" class="form-control me-2" placeholder="Search news">
 <button class="btn btn-light">Search</button>
 </form>
-
+<button
+  class="btn btn-success btn-sm mt-2"
+  onclick="window.open(
+    'https://wa.me/?text=' + encodeURIComponent(window.location.href),
+    '_blank'
+  )"
+>
+WhatsApp Share
+</button>
+📤 Share
+</button>
 </div>
 </div>
 </nav>
@@ -151,7 +161,11 @@ async function loadArticle(){
       By ${article.author || "Shekhawati Sankalp"} • ${article.date || ""}
     </div>
 
-    <img src="${article.image || 'https://picsum.photos/800/400'}" class="article-image">
+    <img 
+  src="${article.image || '/logo.png'}"
+  onerror="this.src='/logo.png'"
+  class="article-image"
+>
 
     <div class="article-content">
       ${article.content}
@@ -168,7 +182,24 @@ async function loadBreaking(){
   const headlines = articles.slice(0,5).map(a=>a.title).join(" • ")
   document.getElementById("breakingNews").innerText = headlines
 }
+window.shareArticle = async function(title, url) {
 
+  if (navigator.share) {
+
+    await navigator.share({
+      title: title,
+      url: url
+    });
+
+  } else {
+
+    navigator.clipboard.writeText(url);
+
+    alert("Link copied!");
+
+  }
+
+};
 /* SEARCH */
 async function searchNews(){
 

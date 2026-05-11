@@ -131,7 +131,11 @@ async function loadTrendingNews(){
     container.innerHTML += `
       <div class="col-md-4">
         <div class="news-card">
-          <img src="${article.image || 'https://picsum.photos/400'}">
+          <img 
+  src="${article.image || '/logo.png'}"
+  onerror="this.src='/logo.png'"
+  class="article-image"
+>
           <h5>${article.title}</h5>
           <p>${article.content.substring(0,100)}...</p>
           <a href="article.html?id=${article.id}" class="btn btn-dark btn-sm m-3">
