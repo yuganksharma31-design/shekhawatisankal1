@@ -194,6 +194,7 @@
 </head>
 
 <body>
+<body>
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark">
@@ -208,49 +209,63 @@
 
     </a>
 
-    <ul class="navbar-nav ms-auto">
+    <button
+      class="navbar-toggler"
+      data-bs-toggle="collapse"
+      data-bs-target="#navMenu">
 
-      <li class="nav-item">
-        <a class="nav-link" href="/">Home</a>
-      </li>
+      <span class="navbar-toggler-icon"></span>
 
-      <li class="nav-item">
-        <a class="nav-link" href="/local.html">Local News</a>
-      </li>
+    </button>
 
-      <li class="nav-item">
-        <a class="nav-link" href="/trending.html">Trending</a>
-      </li>
+    <div class="collapse navbar-collapse" id="navMenu">
 
-    </ul>
+      <ul class="navbar-nav ms-auto">
 
-    <form class="d-flex ms-3"
-          onsubmit="searchNews(); return false;">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
 
-      <input
-        id="searchInput"
-        class="form-control me-2"
-        placeholder="Search news"
-      >
+        <li class="nav-item">
+          <a class="nav-link" href="/local.html">Local News</a>
+        </li>
 
-      <button class="btn btn-light">
-        Search
-      </button>
+        <li class="nav-item">
+          <a class="nav-link" href="/trending.html">Trending</a>
+        </li>
 
-    </form>
+      </ul>
+
+      <form
+        class="d-flex ms-3"
+        onsubmit="searchNews(); return false;">
+
+        <input
+          id="searchInput"
+          class="form-control me-2"
+          placeholder="Search news"
+        >
+
+        <button class="btn btn-light">
+          Search
+        </button>
+
+      </form>
+
+    </div>
 
   </div>
 
 </nav>
 
 <!-- BREAKING -->
-<div class="breaking text-center">
+<div class="breaking">
 
   <marquee id="breakingNews"></marquee>
 
 </div>
 
-<!-- HERO + TRENDING -->
+<!-- MAIN SECTION -->
 <div class="container mt-4">
 
   <div class="row g-4">
@@ -273,8 +288,9 @@
             🔥 Trending News
           </h4>
 
-          <a href="/trending.html"
-             class="btn btn-sm btn-outline-danger">
+          <a
+            href="/trending.html"
+            class="btn btn-sm btn-outline-danger">
 
             View All
 
@@ -292,8 +308,23 @@
 
 </div>
 
-<!-- NEWS GRID -->
+<!-- LATEST NEWS -->
 <div class="container mt-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2 class="fw-bold">
+      📰 Latest News
+    </h2>
+
+    <a href="/allnews.html"
+       class="btn btn-danger">
+
+       View More
+
+    </a>
+
+  </div>
 
   <div class="row g-4" id="newsContainer"></div>
 
@@ -372,9 +403,7 @@ async function loadHero(){
           BREAKING NEWS
         </span>
 
-        <h1>
-          ${a.title}
-        </h1>
+        <h1>${a.title}</h1>
 
         <p>
           ${a.content.substring(0,250)}...
@@ -384,24 +413,11 @@ async function loadHero(){
 
           <a
             href="article.html?id=${a.id}"
-            class="btn btn-danger"
-          >
-            Read Full Story
-          </a>
+            class="btn btn-danger">
 
-          <button
-            class="btn btn-success ms-2"
-            onclick="window.open(
-              'https://wa.me/?text=' + encodeURIComponent(
-                '${a.title} ' +
-                window.location.origin +
-                '/article.html?id=${a.id}'
-              ),
-              '_blank'
-            )"
-          >
-            WhatsApp Share
-          </button>
+            Read Full Story
+
+          </a>
 
         </div>
 
@@ -440,9 +456,7 @@ async function loadTrending(){
 
           <div>
 
-            <h6>
-              ${a.title}
-            </h6>
+            <h6>${a.title}</h6>
 
           </div>
 
@@ -480,38 +494,23 @@ async function loadNews(){
 
           <div class="p-3">
 
-            <h5>
-              ${a.title}
-            </h5>
+            <span class="badge bg-danger mb-2">
+              ${a.category || "NEWS"}
+            </span>
+
+            <h5>${a.title}</h5>
 
             <p>
               ${a.content.substring(0,120)}...
             </p>
 
-            <div class="d-flex gap-2">
+            <a
+              href="article.html?id=${a.id}"
+              class="btn btn-dark btn-sm">
 
-              <a
-                href="article.html?id=${a.id}"
-                class="btn btn-dark btn-sm"
-              >
-                Read More
-              </a>
+              Read More
 
-              <button
-                class="btn btn-success btn-sm"
-                onclick="window.open(
-                  'https://wa.me/?text=' + encodeURIComponent(
-                    '${a.title} ' +
-                    window.location.origin +
-                    '/article.html?id=${a.id}'
-                  ),
-                  '_blank'
-                )"
-              >
-                Share
-              </button>
-
-            </div>
+            </a>
 
           </div>
 
